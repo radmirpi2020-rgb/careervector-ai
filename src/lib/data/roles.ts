@@ -22,7 +22,9 @@ const PSY = {
   support: psych(0.6, 0.5, 0.3, 0.6, 0.35, 0.6, 0.5, 0.6, 0.5),
   creative: psych(0.35, 0.45, 0.95, 0.55, 0.5, 0.25, 0.75, 0.45, 0.75),
   sales: psych(0.2, 0.4, 0.35, 0.7, 0.9, 0.4, 0.7, 0.7, 0.55),
-  content: psych(0.25, 0.45, 0.8, 0.62, 0.55, 0.35, 0.7, 0.55, 0.6)
+  content: psych(0.25, 0.45, 0.8, 0.62, 0.55, 0.35, 0.7, 0.55, 0.6),
+  ops: psych(0.7, 0.35, 0.2, 0.55, 0.55, 0.7, 0.45, 0.55, 0.4),
+  training: psych(0.2, 0.45, 0.5, 0.9, 0.45, 0.4, 0.55, 0.8, 0.55)
 } as const;
 
 type PsyKey = keyof typeof PSY;
@@ -446,6 +448,41 @@ const BASE_ROLES: CareerRoleTarget[] = [
   R('support_engineer', 'Инженер поддержки (L2/L3)', 'IT / Поддержка', 125000, 5, 'support', [
     req('linux', 3, true), req('networks', 3), req('communication', 3, true),
     req('sql'), req('bash'), req('monitoring'), req('documentation')
+  ]),
+  // ---------- HR и обучение ----------
+  R('hr_analyst', 'HR-аналитик', 'HR / IT', 140000, 7, 'data', [
+    req('hr_metrics', 3, true), req('sql', 3), req('excel', 3, true),
+    req('data_analysis', 3), req('powerbi'), req('statistics'), req('communication'), req('presentation')
+  ]),
+  R('lnd_specialist', 'L&D-специалист', 'HR / Образование', 145000, 8, 'training', [
+    req('lnd', 3, true), req('mentoring', 3, true), req('facilitation', 3),
+    req('presentation', 3), req('communication', 3, true), req('hr_metrics'), req('project_planning'), req('english')
+  ]),
+  // ---------- Новые IT-роли ----------
+  R('blockchain_developer', 'Blockchain-разработчик', 'Web3 / FinTech', 260000, 12, 'dev', [
+    req('solidity', 3, true), req('web3', 3, true), req('javascript', 3, true),
+    req('go'), req('python'), req('system_design'), req('security'), req('git')
+  ]),
+  R('robotics_engineer', 'Инженер-робототехник', 'Инженерия / IoT', 190000, 9, 'infra', [
+    req('robotics', 3, true), req('python', 3, true), req('cpp', 3),
+    req('embedded', 3), req('linux'), req('computer_vision'), req('networks'), req('critical_thinking')
+  ]),
+  R('data_architect', 'Архитектор данных', 'Данные и аналитика', 260000, 11, 'data', [
+    req('data_warehousing', 3, true), req('sql', 3, true), req('architecture', 3, true),
+    req('etl', 3), req('spark'), req('cloud_aws'), req('system_design'), req('data_analysis')
+  ]),
+  R('game_developer', 'Game Developer', 'Геймдев', 150000, 8, 'dev', [
+    req('unity', 3, true), req('csharp', 3, true), req('game_design', 3),
+    req('unreal'), req('gamedev_domain'), req('design_patterns'), req('git'), req('motion_design')
+  ]),
+  // ---------- Продажи, маркетинг, операции ----------
+  R('logistics_manager', 'Менеджер по логистике', 'Логистика / Ритейл', 120000, 4, 'ops', [
+    req('supply_chain', 3, true), req('logistics', 3, true), req('excel', 3),
+    req('negotiation', 3), req('crm'), req('project_planning'), req('risk_management')
+  ]),
+  R('account_manager', 'Аккаунт-менеджер', 'IT / Сервисы', 140000, 5, 'sales', [
+    req('b2b_sales', 3, true), req('communication', 3, true), req('negotiation', 3, true),
+    req('crm', 3), req('presentation'), req('stakeholder_management'), req('excel')
   ])
 ];
 

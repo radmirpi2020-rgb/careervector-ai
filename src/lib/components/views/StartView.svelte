@@ -3,9 +3,10 @@
   import { profile, setView, startAudit } from '$lib/stores/profile';
   import { psychotypeCode, psychotypeLabel } from '$lib/engine/matching';
   import { ROLES } from '$lib/data/roles';
+  import { QUESTIONS } from '$lib/data/questions';
 
   const features = [
-    { icon: ListChecks, title: '12 ситуационных кейсов', text: 'Не «любите ли вы людей?», а реальные рабочие дилеммы: дедлайны, конфликты, хаос данных.' },
+    { icon: ListChecks, title: `${QUESTIONS.length} ситуационных кейсов`, text: 'Не «любите ли вы людей?», а реальные рабочие дилеммы: дедлайны, конфликты, хаос данных.' },
     { icon: CircleGauge, title: 'Векторный матчинг', text: `Сопоставление вашего психопрофиля RIASEC и скилл-сета с каталогом из ${ROLES.length}+ ролей.` },
     { icon: FileText, title: 'Скилл-гэп аудит', text: 'Разбор дефицита навыков с расчётом сроков перехода и зарплатной вилки.' },
     { icon: Radar, title: 'Радары компетенций', text: 'Наглядная карта ваших сильных сторон и точек роста относительно целевой роли.' },
@@ -14,7 +15,7 @@
 
   const stats = [
     { value: `${ROLES.length}+`, label: 'ролей в каталоге' },
-    { value: '12', label: 'кейсов-дилемм' },
+    { value: `${QUESTIONS.length}`, label: 'кейсов-дилемм' },
     { value: '< 90 c', label: 'до первых результатов' },
     { value: '0', label: 'байт данных на сервере' }
   ];

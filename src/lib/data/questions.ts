@@ -132,6 +132,61 @@ export const QUESTIONS: QuizQuestion[] = [
       { id: 'd', text: 'Развиваться в организатора: процессы, методологии, чтобы всё работало как часы', riasec: { conventional: 2 }, prefs: { ambiguityTolerance: -0.15 } },
       { id: 'e', text: 'Совмещать и то и другое: экспертиза + влияние на стратегию, без рутины менеджмента', riasec: { enterprising: 2, investigative: 1 }, prefs: { ambiguityTolerance: 0.15, autonomyPreference: 0.1 } }
     ]
+  },
+  {
+    id: 'q13_visual',
+    scenario: 'Вам нужно донести сложную идею до людей, которые вообще не в теме. Как вы это сделаете?',
+    options: [
+      { id: 'a', text: 'Нарисую схему/инфографику или соберу наглядный макет — картинка объясняет лучше слов', riasec: { artistic: 2, investigative: 1 } },
+      { id: 'b', text: 'Расскажу простыми словами, с историями и примерами из жизни', riasec: { social: 2 }, prefs: { peopleInteractionLoad: 0.1 } },
+      { id: 'c', text: 'Разложу по шагам: инструкция, этапы, чек-лист — каждый сам разберётся', riasec: { conventional: 2 } },
+      { id: 'd', text: 'Покажу работающий прототип — пусть потрогают руками', riasec: { realistic: 2 }, prefs: { ambiguityTolerance: 0.1 } },
+      { id: 'e', text: 'Соберу ключевые цифры в наглядные метрики — данные убеждают сами', riasec: { investigative: 2, conventional: 1 } }
+    ]
+  },
+  {
+    id: 'q14_market',
+    scenario: 'Вам предлагают два проекта: стабильный внутренний с понятными задачами и новый рыночный с большими рисками и потенциальным ростом.',
+    options: [
+      { id: 'a', text: 'Выберу рыночный: там можно сделать имя, получить признание и быстро вырасти', riasec: { enterprising: 2 }, prefs: { ambiguityTolerance: 0.25 } },
+      { id: 'b', text: 'Выберу стабильный: предсказуемость и понятные рамки дороже азарта', riasec: { conventional: 2 }, prefs: { ambiguityTolerance: -0.25 } },
+      { id: 'c', text: 'Оценю цифры и риски обоих и выберу по расчёту, а не по ощущению', riasec: { investigative: 2 }, prefs: { ambiguityTolerance: 0.05 } },
+      { id: 'd', text: 'Пойду туда, где интереснее задачи и больше свободы самому решать', riasec: { artistic: 2 }, prefs: { autonomyPreference: 0.2, ambiguityTolerance: 0.1 } },
+      { id: 'e', text: 'Совмещу: договорюсь о стабильной базе и добавлю немного нового в рамках неё', riasec: { social: 2, conventional: 1 }, prefs: { ambiguityTolerance: -0.05 } }
+    ]
+  },
+  {
+    id: 'q15_craft',
+    scenario: 'Когда вы выполняете сложную задачу и всё наконец сходится, что вас больше всего радует?',
+    options: [
+      { id: 'a', text: 'Что я лично сделал это руками — виден конкретный результат', riasec: { realistic: 2 }, prefs: { autonomyPreference: 0.1 } },
+      { id: 'b', text: 'Что я понял, как это устроено, и могу объяснить логику другим', riasec: { investigative: 2 } },
+      { id: 'c', text: 'Что результат получился красивым и элегантным', riasec: { artistic: 2 } },
+      { id: 'd', text: 'Что благодаря мне команда/заказчик довольны и работа двигается дальше', riasec: { social: 2 }, prefs: { peopleInteractionLoad: 0.15 } },
+      { id: 'e', text: 'Что задача закрыта в срок по плану и все показатели сходятся', riasec: { conventional: 2 } }
+    ]
+  },
+  {
+    id: 'q16_growth',
+    scenario: 'Вы долго учились новому навыку, но компания пока не даёт его применять. Что сделаете?',
+    options: [
+      { id: 'a', text: 'Найду проект/команду, где он нужен, или предложу новый продукт под него', riasec: { enterprising: 2 }, prefs: { autonomyPreference: 0.15 } },
+      { id: 'b', text: 'Буду прокачивать навык в своём объёме: pet-проект, комьюнити, конференции', riasec: { artistic: 2, investigative: 1 }, prefs: { autonomyPreference: 0.2 } },
+      { id: 'c', text: 'Проведу внутренний воркшоп и покажу команде пользу — спрос появится', riasec: { social: 2 }, prefs: { peopleInteractionLoad: 0.15 } },
+      { id: 'd', text: 'Терпеливо продолжу делать текущую работу на отлично — применение придёт само', riasec: { conventional: 2 }, prefs: { autonomyPreference: -0.15 } },
+      { id: 'e', text: 'Проанализирую рынок: где этот навык востребован, и приму решение по фактам', riasec: { investigative: 2 }, prefs: { ambiguityTolerance: 0.05 } }
+    ]
+  },
+  {
+    id: 'q17_feedback',
+    scenario: 'После долгой работы вы получаете разгромный отзыв о своём результате. Первая реакция?',
+    options: [
+      { id: 'a', text: 'Разберу каждый пункт отзыва, проверю по фактам и исправлю то, что обоснованно', riasec: { investigative: 2, realistic: 1 }, prefs: { ambiguityTolerance: 0.05 } },
+      { id: 'b', text: 'Расстроюсь, но быстро переключусь: отзыв — это данные, а не приговор', riasec: { realistic: 2 }, prefs: { peopleInteractionLoad: -0.1, ambiguityTolerance: 0.15 } },
+      { id: 'c', text: 'Пойду обсуждать с теми, кто критиковал, — важно понять их настоящую боль', riasec: { social: 2 }, prefs: { peopleInteractionLoad: 0.2 } },
+      { id: 'd', text: 'Соберу альтернативные точки зрения и решения, чтобы ответить нестандартно', riasec: { artistic: 2 }, prefs: { ambiguityTolerance: 0.1 } },
+      { id: 'e', text: 'Составлю план исправлений с чёткими сроками и отчитаюсь по нему', riasec: { conventional: 2 } }
+    ]
   }
 ];
 

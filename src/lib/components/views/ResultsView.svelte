@@ -1,10 +1,11 @@
 ﻿<script lang="ts">
-  import { AlertTriangle, Bookmark, BookmarkCheck, ChevronRight, Flame, RefreshCw, TrendingUp } from '@lucide/svelte';
+  import { AlertTriangle, Bookmark, BookmarkCheck, ChevronRight, Download, Flame, Printer, RefreshCw, TrendingUp } from '@lucide/svelte';
   import type { MatchAnalysisResult } from '$lib/types';
   import { skillOverlap } from '$lib/engine/matching';
   import { ROLES } from '$lib/data/roles';
   import { profile, selectRole, setView, toggleSaveRole } from '$lib/stores/profile';
   import { psychotypeCode, psychotypeLabel } from '$lib/engine/matching';
+  import { downloadReport } from '$lib/report';
   import Radar from '$lib/components/Radar.svelte';
   import SkillRadar from '$lib/components/SkillRadar.svelte';
 
@@ -58,13 +59,36 @@
           · Готовность: {$profile.weeklyLearningHours} ч/нед
         </p>
       </div>
-      <button
-        onclick={() => setView('start')}
-        class="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-slate-800"
-      >
-        <RefreshCw class="h-4 w-4" />
-        Пройти аудит заново
-      </button>
+      <div class="flex shrink-0 flex-wrap items-center gap-2 print:hidden">
+        <button
+          onclick={() => { if ($profile) downloadReport($profile, match, 'json'); }}
+          class="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-slate-800"
+        >
+          <Download class="h-4 w-4" />
+          Экспорт JSON
+        </button>
+        <button
+          onclick={() => { if ($profile) downloadReport($profile, match, 'md'); }}
+          class="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-slate-800"
+        >
+          <Download class="h-4 w-4" />
+          Экспорт MD
+        </button>
+        <button
+          onclick={() => window.print()}
+          class="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-slate-800"
+        >
+          <Printer class="h-4 w-4" />
+          Печать / PDF
+        </button>
+        <button
+          onclick={() => setView('start')}
+          class="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-slate-800"
+        >
+          <RefreshCw class="h-4 w-4" />
+          Пройти аудит заново
+        </button>
+      </div>
     </div>
 
     <div class="grid gap-8 lg:grid-cols-[1.15fr_1fr]">

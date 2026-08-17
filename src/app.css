@@ -12,3 +12,39 @@ body {
 input[type="range"] {
   cursor: pointer;
 }
+
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background: #fff !important;
+    color: #1e293b !important;
+  }
+
+  header,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  * {
+    background: transparent !important;
+    border-color: #cbd5e1 !important;
+    color: #1e293b !important;
+    box-shadow: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .rounded-2xl,
+  .rounded-xl,
+  .rounded-lg {
+    border: 1px solid #e2e8f0 !important;
+  }
+}
