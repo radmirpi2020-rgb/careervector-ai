@@ -1,12 +1,14 @@
 ﻿<script lang="ts">
-  import { Radar, ShieldCheck, Sparkles, ListChecks, FileText, CircleGauge, ArrowRight } from '@lucide/svelte';
+  import { Radar, ShieldCheck, Sparkles, ListChecks, FileText, CircleGauge, ArrowRight, Split } from '@lucide/svelte';
   import { profile, setView, startAudit } from '$lib/stores/profile';
   import { psychotypeCode, psychotypeLabel } from '$lib/engine/matching';
   import { ROLES } from '$lib/data/roles';
-  import { QUESTIONS } from '$lib/data/questions';
+  import { STAGE1_QUESTIONS, STAGE2_QUESTIONS, DIRECTIONS } from '$lib/data/directions';
+
+  const stage2Total = Object.values(STAGE2_QUESTIONS).reduce((acc, qs) => acc + qs.length, 0);
 
   const features = [
-    { icon: ListChecks, title: `${QUESTIONS.length} ситуационных кейсов`, text: 'Не «любите ли вы людей?», а реальные рабочие дилеммы: дедлайны, конфликты, хаос данных.' },
+    { icon: Split, title: '2 теста: направление → специализация', text: `Сначала тест из ${STAGE1_QUESTIONS.length} вопросов выберет ваше направление, затем ${stage2Total} вопросов уточнят специализацию. Простые ответы «да / скорее да / скорее нет / нет».` },
     { icon: CircleGauge, title: 'Векторный матчинг', text: `Сопоставление вашего психопрофиля RIASEC и скилл-сета с каталогом из ${ROLES.length}+ ролей.` },
     { icon: FileText, title: 'Скилл-гэп аудит', text: 'Разбор дефицита навыков с расчётом сроков перехода и зарплатной вилки.' },
     { icon: Radar, title: 'Радары компетенций', text: 'Наглядная карта ваших сильных сторон и точек роста относительно целевой роли.' },
@@ -15,8 +17,8 @@
 
   const stats = [
     { value: `${ROLES.length}+`, label: 'ролей в каталоге' },
-    { value: `${QUESTIONS.length}`, label: 'кейсов-дилемм' },
-    { value: '< 90 c', label: 'до первых результатов' },
+    { value: `${DIRECTIONS.length}`, label: 'направлений · 2 теста' },
+    { value: `${STAGE1_QUESTIONS.length + stage2Total}`, label: 'вопросов да/нет' },
     { value: '0', label: 'байт данных на сервере' }
   ];
 </script>
@@ -32,7 +34,7 @@
       <span class="bg-gradient-to-r from-indigo-400 to-emerald-400 bg-clip-text text-transparent">переход реально выгоден</span>
     </h1>
     <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-400">
-      Никаких шаблонных гороскопов. Деконструкция вашего опыта через ситуационные кейсы,
+      Никаких шаблонных гороскопов. Два коротких теста с простыми ответами «да» и «нет»,
       векторное сопоставление с каталогом профессий и персональный роадмап закрытия скилл-гэпа.
     </p>
     <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

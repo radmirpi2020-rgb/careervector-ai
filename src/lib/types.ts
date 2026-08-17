@@ -95,17 +95,3 @@ export interface UserProfileState {
   completedRoadmapStepIds: string[];
   completedAt: string;
 }
-
-export interface QuizOption {
-  id: string;
-  text: string;
-  riasec: Partial<Pick<PsychologicalVector, 'realistic' | 'investigative' | 'artistic' | 'social' | 'enterprising' | 'conventional'>>;
-  prefs?: Partial<Pick<PsychologicalVector, 'ambiguityTolerance' | 'peopleInteractionLoad' | 'autonomyPreference'>>;
-}
-
-export interface QuizQuestion {
-  id: string;
-  scenario: string;
-  context?: string;
-  options: QuizOption[];
-}

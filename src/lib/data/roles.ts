@@ -27,6 +27,8 @@ const PSY = {
   training: psych(0.2, 0.45, 0.5, 0.9, 0.45, 0.4, 0.55, 0.8, 0.55)
 } as const;
 
+export { PSY };
+
 type PsyKey = keyof typeof PSY;
 
 const req = (skillId: string, minLevel: RequiredSkill['minLevel'] = 3, isMandatory = false): RequiredSkill =>

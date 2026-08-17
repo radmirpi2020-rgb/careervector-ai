@@ -164,9 +164,11 @@ export function buildRoadmap(role: CareerRoleTarget, profile: Pick<UserProfileSt
 
 export function analyzeRole(
   role: CareerRoleTarget,
-  profile: Pick<UserProfileState, 'psychology' | 'skills' | 'currentSalaryRub' | 'weeklyLearningHours'>
+  profile: Pick<UserProfileState, 'psychology' | 'skills' | 'currentSalaryRub' | 'weeklyLearningHours'>,
+  boost = 0
 ): MatchAnalysisResult {
-  const fitPsych = psychologicalFit(profile.psychology, role.requiredPsychology);
+  const fitPsychRaw = psychologicalFit(profile.psychology, role.requiredPsychology);
+  const fitPsych = Math.max(0, Math.min(1, fitPsychRaw * (1 + boost)));
   const { matchScore, details, missingHours } = skillOverlap(role, profile.skills);
   const tfi = transitionFeasibilityIndex(matchScore, fitPsych, missingHours, role.medianSalaryRub, profile.currentSalaryRub);
 
@@ -198,24 +200,28 @@ export function analyzeRole(
 export function findTopMatches(
   profile: Pick<UserProfileState, 'psychology' | 'skills' | 'currentSalaryRub' | 'weeklyLearningHours'>,
   roles: CareerRoleTarget[],
-  topN = 5
+  topN = 5,
+  roleBoost: Record<string, number> = {}
 ): MatchAnalysisResult[] {
   const withTfi = roles.map((role) => {
-    const fitPsych = psychologicalFit(profile.psychology, role.requiredPsychology);
+    const raw = psychologicalFit(profile.psychology, role.requiredPsychology);
+    const fitPsych = Math.max(0, Math.min(1, raw * (1 + (roleBoost[role.id] ?? 0))));
     const { matchScore, missingHours } = skillOverlap(role, profile.skills);
-    const tfi = transitionFeasibilityIndex(matchScore, fitPsych, missingHours, role.medianSalaryRub, profile.currentSalaryRub);
+    const tfiBase = transitionFeasibilityIndex(matchScore, fitPsych, missingHours, role.medianSalaryRub, profile.currentSalaryRub);
+    const boost = roleBoost[role.id] ?? 0;
+    const tfi = boost > 0 ? tfiBase * (1 + boost * 0.12) : tfiBase;
     return { role, tfi, fitPsych, matchScore };
   });
 
   const eligible = withTfi.filter((x) => x.tfi > 0).sort((a, b) => b.tfi - a.tfi);
   const psychOnly = withTfi.filter((x) => x.tfi <= 0).sort((a, b) => b.fitPsych - a.fitPsych);
 
-  const pool: (MatchAnalysisResult & { _tfi?: number })[] = eligible.map((x) => ({ ...analyzeRole(x.role, profile), _tfi: x.tfi }));
+  const pool: (MatchAnalysisResult & { _tfi?: number })[] = eligible.map((x) => ({ ...analyzeRole(x.role, profile, roleBoost[x.role.id] ?? 0), _tfi: x.tfi }));
   let results = pool.sort((a, b) => (b._tfi ?? 0) - (a._tfi ?? 0)).slice(0, topN);
 
   if (results.length < 3) {
     const needed = 3 - results.length;
-    const fallback: (MatchAnalysisResult & { _tfi?: number })[] = psychOnly.slice(0, needed).map((x) => ({ ...analyzeRole(x.role, profile), isPsychOnlyFallback: true, _tfi: -1 }));
+    const fallback: (MatchAnalysisResult & { _tfi?: number })[] = psychOnly.slice(0, needed).map((x) => ({ ...analyzeRole(x.role, profile, roleBoost[x.role.id] ?? 0), isPsychOnlyFallback: true, _tfi: -1 }));
     results = [...results, ...fallback];
   }
 
