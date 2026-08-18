@@ -1,52 +1,142 @@
 ﻿<script lang="ts">
-  import { Check, Minus, Plus, X, Calculator, BrainCircuit } from '@lucide/svelte';
+  import { Check, ChevronDown, Minus, Plus, Search, X, Calculator, BrainCircuit } from '@lucide/svelte';
   import { SKILL_LIST } from '$lib/data/skills';
+  import { ROLES } from '$lib/data/roles';
+  import { DIRECTION_BY_ID, directionOfRole } from '$lib/data/directions';
   import {
-    adjustSkillLevel, completeAudit, currentSalary, selectedSkills,
+    adjustSkillLevel, completeAudit, currentSalary, selectedDirection, selectedSkills,
     setCurrentSalary, setWeeklyHours, toggleSkill, weeklyHours
   } from '$lib/stores/profile';
 
+  const dirId = $derived($selectedDirection);
+  const dirTitle = $derived(DIRECTION_BY_ID[dirId]?.title ?? '');
+
+  const relevantIds = $derived.by(() => {
+    const ids = new Set<string>();
+    for (const r of ROLES) {
+      if (directionOfRole(r.id) === dirId) {
+        for (const s of r.requiredSkills) ids.add(s.skillId);
+      }
+    }
+    return ids;
+  });
+
+  let showAll = $state(false);
+  let filter = $state('');
+  let collapsed = $state<Record<string, boolean>>({});
+
+  const totalCount = SKILL_LIST.length;
+
   const categories = $derived.by(() => {
+    const q = filter.trim().toLowerCase();
+    const list = q
+      ? SKILL_LIST.filter((s) => s.name.toLowerCase().includes(q))
+      : showAll
+        ? SKILL_LIST
+        : SKILL_LIST.filter((s) => relevantIds.has(s.id));
     const map = new Map<string, typeof SKILL_LIST>();
-    for (const s of SKILL_LIST) {
+    for (const s of list) {
       const arr = map.get(s.category) ?? [];
       arr.push(s);
       map.set(s.category, arr);
     }
-    return Array.from(map.entries()).map(([name, skills]) => ({ name, skills }));
+    return Array.from(map.entries())
+      .map(([name, skills]) => ({
+        name,
+        skills,
+        relevant: skills.some((s) => relevantIds.has(s.id))
+      }))
+      .sort((a, b) => Number(b.relevant) - Number(a.relevant));
   });
 
+  const visibleCount = $derived(categories.reduce((acc, c) => acc + c.skills.length, 0));
+  const relevantCount = $derived(relevantIds.size);
   const selectedCount = $derived(Object.keys($selectedSkills).length);
+
+  function toggleCat(name: string) {
+    collapsed = { ...collapsed, [name]: !(collapsed[name] ?? false) };
+  }
+
+  function toggleShowAll() {
+    showAll = !showAll;
+    collapsed = {};
+  }
 </script>
 
 <div class="mx-auto max-w-3xl px-4 pb-20 pt-8">
-  <div class="mb-8 text-center">
+  <div class="mb-6 text-center">
     <h1 class="text-2xl font-bold text-slate-50">Какие навыки у вас уже есть?</h1>
     <p class="mx-auto mt-2 max-w-xl text-sm text-slate-400">
-      Отметьте, что реально применяли в работе за последние годы. Уровень можно поправить.
-      Это существенно повысит точность матчинга (можно пропустить).
+      Отметьте, что реально применяли в работе за последние годы.
+      Уровень можно поправить. Точность матчинга вырастет — можно пропустить.
     </p>
   </div>
 
-  <div class="flex flex-col gap-6">
+  <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="relative flex-1">
+      <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+      <input
+        type="text"
+        placeholder="Поиск навыка…"
+        value={filter}
+        oninput={(e) => (filter = e.currentTarget.value)}
+        class="w-full rounded-lg border border-slate-700 bg-slate-900/70 py-2.5 pl-9 pr-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-indigo-500"
+      />
+    </div>
+    <button
+      onclick={toggleShowAll}
+      class="shrink-0 rounded-lg border border-slate-700 px-4 py-2.5 text-xs font-medium text-slate-300 transition hover:bg-slate-800"
+    >
+      {showAll ? 'Только для направления «{dirTitle}»' : 'Показать все категории'}
+    </button>
+  </div>
+
+  {#if !filter}
+    <p class="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+      <span class="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 font-medium text-indigo-300">
+        {dirTitle}
+      </span>
+      показаны навыки, важные для вашего направления ({visibleCount} из {totalCount} в каталоге)
+    </p>
+  {/if}
+
+  {#if categories.length === 0}
+    <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 text-center text-sm text-slate-500">
+      Ничего не найдено по запросу «{filter}».
+    </div>
+  {/if}
+
+  <div class="flex flex-col gap-4">
     {#each categories as cat}
-      <div>
-        <h2 class="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500">{cat.name}</h2>
-        <div class="flex flex-wrap gap-2">
-          {#each cat.skills as skill}
-            <button
-              onclick={() => toggleSkill(skill.id)}
-              class={$selectedSkills[skill.id]
-                ? 'inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/60 bg-indigo-500/15 px-3 py-1.5 text-xs text-indigo-200 transition'
-                : 'inline-flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-600'}
-            >
-              {#if $selectedSkills[skill.id]}
-                <Check class="h-3 w-3 text-indigo-400" />
-              {/if}
-              {skill.name}
-            </button>
-          {/each}
-        </div>
+      {@const isCollapsed = collapsed[cat.name] ?? !(filter || showAll ? true : cat.relevant)}
+      <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+        <button
+          onclick={() => toggleCat(cat.name)}
+          class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-800/50"
+        >
+          <span class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            {cat.name}
+            <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-500">{cat.skills.length}</span>
+          </span>
+          <ChevronDown class="h-4 w-4 shrink-0 text-slate-500 transition-transform {isCollapsed ? '' : 'rotate-180'}" />
+        </button>
+        {#if !isCollapsed}
+          <div class="flex flex-wrap gap-2 border-t border-slate-800/70 p-4">
+            {#each cat.skills as skill}
+              <button
+                onclick={() => toggleSkill(skill.id)}
+                class={$selectedSkills[skill.id]
+                  ? 'inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/60 bg-indigo-500/15 px-3 py-1.5 text-xs text-indigo-200 transition'
+                  : 'inline-flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-600'}
+              >
+                {#if $selectedSkills[skill.id]}
+                  <Check class="h-3 w-3 text-indigo-400" />
+                {/if}
+                {skill.name}
+              </button>
+            {/each}
+          </div>
+        {/if}
       </div>
     {/each}
   </div>

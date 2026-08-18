@@ -1,12 +1,13 @@
 ﻿<script lang="ts">
-  import { ArrowLeft, CheckCircle2, ChevronRight, Keyboard, RotateCcw, Sparkles } from '@lucide/svelte';
+  import { ArrowLeft, ArrowRight, CheckCircle2, ChevronRight, Keyboard, RotateCcw, Sparkles } from '@lucide/svelte';
   import { fade } from 'svelte/transition';
+  import { onDestroy } from 'svelte';
   import {
-    answerCurrent, backQuestion, getQuestion, quizAnswers, quizIndex, quizPhase,
-    restartStage1, confirmDirection, selectedDirection, stage1Total, currentStageSize,
-    topDirections
+    advanceQuestion, answerCurrent, backQuestion, confirmDirection, currentStageSize,
+    getQuestion, jumpToQuestion, quizAnswers, quizIndex, quizPhase, restartStage1,
+    selectAnswer, selectedDirection, stage1Total, topDirections
   } from '$lib/stores/profile';
-  import { ANSWER_OPTIONS, DIRECTION_BY_ID, type CareerDirection } from '$lib/data/directions';
+  import { ANSWER_OPTIONS, DIRECTION_BY_ID, STAGE1_QUESTIONS, stage2QuestionsFor, type CareerDirection } from '$lib/data/directions';
 
   const phase = $derived($quizPhase);
   const fallbackDir: CareerDirection = { id: 'dev', title: 'Разработка', tagline: '', anchor: 'dev', groups: [] };
@@ -14,16 +15,61 @@
   const question = $derived(getQuestion($quizIndex));
   const answers = $derived($quizAnswers ?? {});
   const stageSize = $derived(currentStageSize());
+  const questions = $derived(phase === 'stage1' ? STAGE1_QUESTIONS : stage2QuestionsFor($selectedDirection));
   const progress = $derived(
     phase === 'stage1'
       ? (($quizIndex + 1) / stage1Total) * 50
       : 50 + (($quizIndex + 1) / stageSize) * 50
   );
   const candidates = $derived(topDirections(answers, 3));
+  const stageAnswered = $derived(questions.filter((q) => answers[q.id]).length);
+  const isCurrentAnswered = $derived(Boolean(question && answers[question.id]));
+
+  let advanceTimer: ReturnType<typeof setTimeout> | undefined;
+
+  onDestroy(() => {
+    if (advanceTimer) clearTimeout(advanceTimer);
+  });
+
+  function clearAdvance() {
+    if (advanceTimer) {
+      clearTimeout(advanceTimer);
+      advanceTimer = undefined;
+    }
+  }
+
+  function pick(optionId: string) {
+    if (answers[question.id] === optionId) return;
+    clearAdvance();
+    selectAnswer(optionId);
+    advanceTimer = setTimeout(() => {
+      advanceTimer = undefined;
+      advanceQuestion();
+    }, 500);
+  }
+
+  function next() {
+    clearAdvance();
+    if (isCurrentAnswered) advanceQuestion();
+  }
+
+  function prev() {
+    clearAdvance();
+    backQuestion();
+  }
+
+  function goto(i: number) {
+    clearAdvance();
+    jumpToQuestion(i);
+  }
 
   function onKeydown(e: KeyboardEvent) {
     if (e.key === 'ArrowLeft') {
-      backQuestion();
+      prev();
+      return;
+    }
+    if (e.key === 'ArrowRight') {
+      if (isCurrentAnswered) next();
       return;
     }
     const idx = Number(e.key) - 1;
@@ -32,6 +78,7 @@
       return;
     }
     if (idx >= 0 && idx < ANSWER_OPTIONS.length) {
+      clearAdvance();
       answerCurrent(ANSWER_OPTIONS[idx].id);
     }
   }
@@ -40,7 +87,7 @@
 <svelte:window onkeydown={onKeydown} />
 
 <div class="mx-auto max-w-2xl px-4 pb-20 pt-8">
-  <div class="mb-8">
+  <div class="mb-6">
     <div class="mb-2 flex items-center justify-between text-xs text-slate-500">
       <span>
         {#if phase === 'stage1'}
@@ -55,16 +102,44 @@
         <span class="inline-flex items-center gap-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 font-medium text-indigo-300">
           {direction.title}
         </span>
-      {:else}
+      {:else if phase !== 'checkpoint'}
         <span class="inline-flex items-center gap-1">
           <Keyboard class="h-3.5 w-3.5" />
-          {phase === 'checkpoint' ? 'клавиши 1–3 для выбора' : 'клавиши 1–4 · ← назад'}
+          1–4 для ответа · ← → для навигации
         </span>
       {/if}
     </div>
+
     <div class="h-2 w-full overflow-hidden rounded-full bg-slate-800">
       <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-500" style="width: {progress}%"></div>
     </div>
+
+    {#if phase !== 'checkpoint'}
+      <div class="mt-3 flex items-center justify-between gap-3">
+        <span class="text-xs font-medium text-slate-400">
+          Вопрос {phase === 'stage2' ? $quizIndex + 1 : $quizIndex + 1} из {questions.length}
+          <span class="text-slate-600">· отвечено {stageAnswered}</span>
+        </span>
+        <span class="text-[11px] text-slate-600">нажмите на точку, чтобы перейти к вопросу</span>
+      </div>
+      <div class="mt-2 flex flex-wrap gap-1.5" aria-label="Навигация по вопросам">
+        {#each questions as q, i (q.id)}
+          <button
+            title="Вопрос {i + 1}{answers[q.id] ? ' — отвечен' : ''}"
+            onclick={() => goto(i)}
+            aria-label="Перейти к вопросу {i + 1}"
+            class="h-3 w-3 rounded-full transition hover:scale-125
+              {answers[q.id]
+                ? i === $quizIndex
+                  ? 'bg-emerald-400 ring-2 ring-emerald-400/40'
+                  : 'bg-indigo-500'
+                : i === $quizIndex
+                  ? 'bg-slate-300 ring-2 ring-slate-300/40'
+                  : 'bg-slate-700'}"
+          ></button>
+        {/each}
+      </div>
+    {/if}
   </div>
 
   {#if phase === 'checkpoint'}
@@ -75,7 +150,8 @@
       <h2 class="text-xl font-bold text-slate-50 sm:text-2xl">Ваше направление</h2>
       <p class="mx-auto mt-2 max-w-md text-sm text-slate-400">
         По вашим ответам вы ближе всего к сфере «{candidates[0]?.title ?? '—'}».
-        Подтвердите или выберите другое — тест специализаций продолжится по нему.
+        Подтвердите или выберите другое — тест специализаций
+        ({stage2QuestionsFor($selectedDirection).length} вопросов) продолжится по нему.
       </p>
     </div>
 
@@ -118,10 +194,12 @@
     </div>
   {:else}
     {#key question.id}
-      <div transition:fade={{ duration: 220 }}>
+      <div transition:fade={{ duration: 200 }}>
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 sm:p-8">
           {#if phase === 'stage2'}
-            <div class="mb-2 text-xs font-medium uppercase tracking-wider text-indigo-400">{direction.title}</div>
+            <div class="mb-2 text-xs font-medium uppercase tracking-wider text-indigo-400">
+              {direction.title} · {Math.floor(($quizIndex / Math.max(1, questions.length)) * 3) + 1}-й блок из 3
+            </div>
           {/if}
           <h2 class="text-lg font-semibold leading-snug text-slate-50 sm:text-xl">{question.statement}</h2>
         </div>
@@ -130,7 +208,7 @@
           {#each ANSWER_OPTIONS as opt, i (opt.id)}
             {@const isAnswered = answers[question.id] === opt.id}
             <button
-              onclick={() => answerCurrent(opt.id)}
+              onclick={() => pick(opt.id)}
               class="group flex items-center gap-3 rounded-xl border p-4 text-left transition
                 {isAnswered
                   ? 'border-emerald-500/60 bg-emerald-500/10'
@@ -155,15 +233,29 @@
           {/each}
         </div>
 
-        {#if $quizIndex > 0 || phase === 'stage2'}
+        <div class="mt-6 flex items-center justify-between gap-3">
           <button
-            onclick={backQuestion}
-            class="mt-6 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-300"
+            onclick={prev}
+            class="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2.5 text-sm text-slate-300 transition hover:bg-slate-800 disabled:opacity-40"
+            disabled={phase === 'stage1' && $quizIndex === 0}
           >
             <ArrowLeft class="h-4 w-4" />
-            {phase === 'stage2' && $quizIndex === 0 ? 'К выбору направления' : 'К предыдущему вопросу'}
+            {phase === 'stage2' && $quizIndex === 0 ? 'К выбору направления' : 'Назад'}
           </button>
-        {/if}
+          {#if isCurrentAnswered}
+            <button
+              onclick={next}
+              class="inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-400"
+            >
+              {phase === 'stage1' && $quizIndex === questions.length - 1
+                ? 'Показать направление'
+                : phase === 'stage2' && $quizIndex === questions.length - 1
+                  ? 'Перейти к навыкам'
+                  : 'Далее'}
+              <ArrowRight class="h-4 w-4" />
+            </button>
+          {/if}
+        </div>
       </div>
     {/key}
   {/if}

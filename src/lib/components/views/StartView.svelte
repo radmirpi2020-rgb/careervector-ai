@@ -6,9 +6,12 @@
   import { STAGE1_QUESTIONS, STAGE2_QUESTIONS, DIRECTIONS } from '$lib/data/directions';
 
   const stage2Total = Object.values(STAGE2_QUESTIONS).reduce((acc, qs) => acc + qs.length, 0);
+  const stage2Sizes = Object.values(STAGE2_QUESTIONS).map((qs) => qs.length);
+  const stage2Min = stage2Sizes.length ? Math.min(...stage2Sizes) : 0;
+  const stage2Max = stage2Sizes.length ? Math.max(...stage2Sizes) : 0;
 
   const features = [
-    { icon: Split, title: '2 теста: направление → специализация', text: `Сначала тест из ${STAGE1_QUESTIONS.length} вопросов выберет ваше направление, затем ${stage2Total} вопросов уточнят специализацию. Простые ответы «да / скорее да / скорее нет / нет».` },
+    { icon: Split, title: '2 теста: направление → специализация', text: `Сначала тест из ${STAGE1_QUESTIONS.length} вопросов выберет ваше направление, затем ${stage2Min}–${stage2Max} вопросов уточнят специализацию — всего ${STAGE1_QUESTIONS.length + stage2Total}. Простые ответы «да / скорее да / скорее нет / нет».` },
     { icon: CircleGauge, title: 'Векторный матчинг', text: `Сопоставление вашего психопрофиля RIASEC и скилл-сета с каталогом из ${ROLES.length}+ ролей.` },
     { icon: FileText, title: 'Скилл-гэп аудит', text: 'Разбор дефицита навыков с расчётом сроков перехода и зарплатной вилки.' },
     { icon: Radar, title: 'Радары компетенций', text: 'Наглядная карта ваших сильных сторон и точек роста относительно целевой роли.' },
@@ -34,7 +37,7 @@
       <span class="bg-gradient-to-r from-indigo-400 to-emerald-400 bg-clip-text text-transparent">переход реально выгоден</span>
     </h1>
     <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-400">
-      Никаких шаблонных гороскопов. Два коротких теста с простыми ответами «да» и «нет»,
+      Никаких шаблонных гороскопов. Два последовательных теста с простыми ответами «да» и «нет»,
       векторное сопоставление с каталогом профессий и персональный роадмап закрытия скилл-гэпа.
     </p>
     <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

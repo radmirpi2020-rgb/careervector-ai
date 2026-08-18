@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { computeDirectionScores, computePsychology, computeRoleBoost } from '../stores/profile';
+import {
+  advanceQuestion, backQuestion, computeDirectionScores, computePsychology, computeRoleBoost,
+  confirmDirection, jumpToQuestion, quizAnswers, quizIndex, quizPhase, selectAnswer,
+  startAudit, view
+} from '../stores/profile';
+import { STAGE1_QUESTIONS, stage2QuestionsFor } from '../data/directions';
 import { ROLES } from '../data/roles';
 import { findTopMatches } from './matching';
+import type { View, QuizPhase } from '../stores/profile';
 import type { UserProfileState } from '../types';
 
 const psych = computePsychology({
@@ -83,5 +89,66 @@ describe('Психологический вектор из двух тестов
       expect(v).toBeGreaterThanOrEqual(0);
       expect(v).toBeLessThanOrEqual(1);
     }
+  });
+});
+
+describe('Навигация по тестам', () => {
+  it('selectAnswer записывает ответ, не переходя дальше', () => {
+    startAudit();
+    selectAnswer('strongly_yes');
+    let a: Record<string, string> = {};
+    quizAnswers.subscribe((v) => (a = v))();
+    let i = -1;
+    quizIndex.subscribe((v) => (i = v))();
+    expect(a.d1).toBe('strongly_yes');
+    expect(i).toBe(0);
+  });
+
+  it('advanceQuestion идёт по тесту 1 и ведёт к checkpoint в конце', () => {
+    startAudit();
+    advanceQuestion();
+    let i = -1;
+    quizIndex.subscribe((v) => (i = v))();
+    expect(i).toBe(1);
+    for (let k = 0; k < STAGE1_QUESTIONS.length; k++) advanceQuestion();
+    let p: QuizPhase = 'stage1';
+    quizPhase.subscribe((v) => (p = v))();
+    expect(p).toBe('checkpoint');
+  });
+
+  it('jumpToQuestion ограничивает индекс диапазоном', () => {
+    startAudit();
+    jumpToQuestion(999);
+    let i = -1;
+    quizIndex.subscribe((v) => (i = v))();
+    expect(i).toBe(STAGE1_QUESTIONS.length - 1);
+    jumpToQuestion(-5);
+    quizIndex.subscribe((v) => (i = v))();
+    expect(i).toBe(0);
+  });
+
+  it('подтверждение направления запускает тест 2, его конец ведёт к навыкам', () => {
+    startAudit();
+    confirmDirection('data');
+    let p: QuizPhase = 'stage1';
+    quizPhase.subscribe((v) => (p = v))();
+    let i = -1;
+    quizIndex.subscribe((v) => (i = v))();
+    expect(p).toBe('stage2');
+    expect(i).toBe(0);
+    expect(stage2QuestionsFor('data').length).toBeGreaterThan(5);
+    for (let k = 0; k < stage2QuestionsFor('data').length; k++) advanceQuestion();
+    let v: View = 'start';
+    view.subscribe((x) => (v = x))();
+    expect(v).toBe('skills');
+  });
+
+  it('backQuestion из теста 2 на первом вопросе возвращает к checkpoint', () => {
+    startAudit();
+    confirmDirection('dev');
+    backQuestion();
+    let p: QuizPhase = 'stage1';
+    quizPhase.subscribe((x) => (p = x))();
+    expect(p).toBe('checkpoint');
   });
 });

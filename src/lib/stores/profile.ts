@@ -185,14 +185,21 @@ export function startAudit() {
 }
 
 export function answerCurrent(optionId: string) {
+  const q = getQuestion(indexSync());
+  if (!q) return;
+  quizAnswers.update((a) => ({ ...a, [q.id]: optionId }));
+  advanceQuestion();
+}
+
+export function selectAnswer(optionId: string) {
+  const q = getQuestion(indexSync());
+  if (!q) return;
+  quizAnswers.update((a) => ({ ...a, [q.id]: optionId }));
+}
+
+export function advanceQuestion() {
   const phase = phaseSync();
   const idx = indexSync();
-  const q = getQuestion(idx);
-  if (!q) return;
-  quizAnswers.update((a) => {
-    a[q.id] = optionId;
-    return a;
-  });
   if (phase === 'stage1') {
     if (idx < STAGE1_QUESTIONS.length - 1) quizIndex.set(idx + 1);
     else quizPhase.set('checkpoint');
@@ -201,6 +208,10 @@ export function answerCurrent(optionId: string) {
     if (idx < size - 1) quizIndex.set(idx + 1);
     else view.set('skills');
   }
+}
+
+export function jumpToQuestion(index: number) {
+  quizIndex.set(Math.max(0, Math.min(currentStageSize() - 1, index)));
 }
 
 export function confirmDirection(directionId: string) {

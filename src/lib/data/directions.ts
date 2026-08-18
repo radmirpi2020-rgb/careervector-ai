@@ -159,7 +159,19 @@ export const STAGE1_QUESTIONS: DirectionQuestion[] = [
   { id: 'd9', statement: 'Люблю исследовать причины явлений и ставить эксперименты', weights: { data: 1.5, dev: 0.5, product: 0.5 } },
   { id: 'd10', statement: 'Мне нравится объяснять сложное простыми словами и писать', weights: { people: 1.5, marketing: 1 } },
   { id: 'd11', statement: 'Автоматизация рутины и оптимизация процессов доставляют удовольствие', weights: { dev: 1, data: 1, mgmt: 0.5, infra: 0.5 } },
-  { id: 'd12', statement: 'Хочу видеть осязаемый результат своего труда', weights: { infra: 1.5, dev: 1, product: 0.5 } }
+  { id: 'd12', statement: 'Хочу видеть осязаемый результат своего труда', weights: { infra: 1.5, dev: 1, product: 0.5 } },
+  { id: 'd13', statement: 'Мне интересно разбираться, как устроены сложные системы изнутри', weights: { dev: 1.5, infra: 1, data: 0.5 } },
+  { id: 'd14', statement: 'Каждый день много общаться, вести переговоры и убеждать — это норма для меня', weights: { marketing: 1.5, mgmt: 1.5, people: 1 } },
+  { id: 'd15', statement: 'Большие объёмы информации, поиск аномалий и закономерностей — мой конёк', weights: { data: 1.5, dev: 0.5, product: 0.5 } },
+  { id: 'd16', statement: 'Создавать обучающие материалы и помогать другим расти — моё призвание', weights: { people: 2, marketing: 0.5 } },
+  { id: 'd17', statement: 'Мне нравится быстро видеть эффект своих действий в цифрах продаж', weights: { marketing: 2, mgmt: 0.5 } },
+  { id: 'd18', statement: 'Планирование, приоритеты и контроль сроков даются мне легко', weights: { mgmt: 1.5, infra: 0.5, data: 0.5 } },
+  { id: 'd19', statement: 'Хочу проектировать продукты, которыми удобно и приятно пользоваться', weights: { product: 1.5, dev: 0.5, marketing: 0.5 } },
+  { id: 'd20', statement: 'Готов(а) разбираться в низкоуровневых деталях: протоколы, память, ядра', weights: { dev: 1, infra: 1.5 } },
+  { id: 'd21', statement: 'Запуск и масштабирование продукта с нуля меня заряжает', weights: { product: 1.5, marketing: 1, mgmt: 1 } },
+  { id: 'd22', statement: 'Аналитические отчёты и презентации для руководства — моя сильная сторона', weights: { data: 1, mgmt: 1.5, product: 0.5 } },
+  { id: 'd23', statement: 'Работа с сообществом: форумы, митапы, ответы на вопросы', weights: { people: 1.5, marketing: 1, dev: 0.5 } },
+  { id: 'd24', statement: 'Настраивать технику, ремонтировать и собирать устройства — у меня хорошо получается', weights: { infra: 1.5, dev: 1 } }
 ];
 
 // ===================== ТЕСТ 2: СПЕЦИАЛИЗАЦИИ (да/нет) =====================
@@ -200,6 +212,51 @@ export const STAGE2_QUESTIONS: Record<string, SpecializationQuestion[]> = {
       id: 'dev7', statement: 'Децентрализация и защита данных на блокчейне меня привлекают',
       weights: { g_blockchain: 2, g_embedded: 0.5 },
       riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'dev8', statement: 'Реляционные базы данных и оптимизация запросов мне интересны',
+      weights: { g_backend: 2 },
+      riasec: { investigative: 0.2, conventional: 0.2 }
+    },
+    {
+      id: 'dev9', statement: 'Вёрстка и визуальные детали интерфейса: пиксель-перфект, CSS-анимации',
+      weights: { g_frontend: 2 },
+      riasec: { artistic: 0.3 }
+    },
+    {
+      id: 'dev10', statement: 'Хочу собирать мобильное приложение под ключ с нуля',
+      weights: { g_mobile: 2, g_frontend: 0.5 },
+      riasec: { realistic: 0.3 }
+    },
+    {
+      id: 'dev11', statement: 'Математика и физика игрового движка привлекают больше, чем логика бизнес-приложений',
+      weights: { g_gamedev: 2, g_embedded: 0.5 },
+      riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'dev12', statement: 'Отладка на уровне аппаратуры и осциллографа мне по душе',
+      weights: { g_embedded: 2, g_backend: 0.5 },
+      riasec: { realistic: 0.4 }
+    },
+    {
+      id: 'dev13', statement: 'Оптимизация рутинных бизнес-процессов готовыми инструментами без кода — это моё',
+      weights: { g_nocode: 2 },
+      riasec: { enterprising: 0.2, conventional: 0.3 }
+    },
+    {
+      id: 'dev14', statement: 'Смарт-контракты и децентрализованные приложения — технология будущего',
+      weights: { g_blockchain: 2, g_backend: 0.5 },
+      riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'dev15', statement: 'Писать автотесты и строить системы проверки качества — интереснее фич',
+      weights: { g_qa: 2, g_backend: 0.5 },
+      riasec: { conventional: 0.3 }
+    },
+    {
+      id: 'dev16', statement: 'Быстрое прототипирование: Notion, Airtable, Zapier — мой основной инструментарий',
+      weights: { g_nocode: 2, g_qa: 0.5 },
+      riasec: { enterprising: 0.2 }
     }
   ],
   data: [
@@ -227,6 +284,51 @@ export const STAGE2_QUESTIONS: Record<string, SpecializationQuestion[]> = {
       id: 'data5', statement: 'Глубокие исследования причин и статистические методы — моя зона',
       weights: { g_science: 1.5, g_analytics: 1 },
       riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'data6', statement: 'Построение дашбордов и визуализаций для бизнеса — моя ежедневная работа',
+      weights: { g_analytics: 2 },
+      riasec: { conventional: 0.3 }
+    },
+    {
+      id: 'data7', statement: 'Применять нейросети и генеративные модели к реальным задачам компании',
+      weights: { g_science: 2, g_engineering: 0.5 },
+      riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'data8', statement: 'Настраивать хранилища данных и ETL-процессы интереснее, чем отчёты',
+      weights: { g_engineering: 2, g_analytics: 0.5 },
+      riasec: { realistic: 0.3 }
+    },
+    {
+      id: 'data9', statement: 'Оценка кредитных и рыночных рисков — работа, где важна точность',
+      weights: { g_finance: 2 },
+      riasec: { conventional: 0.3, enterprising: 0.2 }
+    },
+    {
+      id: 'data10', statement: 'A/B-тесты и продуктовые эксперименты — мой основной рабочий инструмент',
+      weights: { g_analytics: 2, g_science: 1 },
+      riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'data11', statement: 'Прогнозы временных рядов и моделирование продаж меня затягивают',
+      weights: { g_science: 1.5, g_analytics: 1.5, g_finance: 1 },
+      riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'data12', statement: 'Оптимизировать инфраструктуру данных: скорость, стоимость, надёжность',
+      weights: { g_engineering: 2, g_science: 0.5 },
+      riasec: { realistic: 0.3 }
+    },
+    {
+      id: 'data13', statement: 'Разбираться в продукте и отвечать на вопрос «почему упала метрика»',
+      weights: { g_analytics: 2, g_finance: 0.5 },
+      riasec: { investigative: 0.2, enterprising: 0.2 }
+    },
+    {
+      id: 'data14', statement: 'Инвестиционный анализ и оценка компаний — моя сфера интереса',
+      weights: { g_finance: 2, g_science: 0.5 },
+      riasec: { enterprising: 0.3, conventional: 0.2 }
     }
   ],
   product: [
@@ -254,6 +356,46 @@ export const STAGE2_QUESTIONS: Record<string, SpecializationQuestion[]> = {
       id: 'prod5', statement: 'Тексты интерфейсов: понятные подписи и микро-копирайт — мне интересно',
       weights: { g_design: 1, g_product: 0.5 },
       riasec: { artistic: 0.2, social: 0.2 }
+    },
+    {
+      id: 'prod6', statement: 'Проводить продуктовые эксперименты и итеративно улучшать продукт',
+      weights: { g_product: 2, g_design: 0.5 },
+      riasec: { enterprising: 0.3, investigative: 0.2 }
+    },
+    {
+      id: 'prod7', statement: 'Юзабилити-тестирование: наблюдать за пользователями и их сложностями',
+      weights: { g_design: 2 },
+      riasec: { social: 0.3, investigative: 0.2 }
+    },
+    {
+      id: 'prod8', statement: 'Создавать дизайн-системы и UI-киты для целой команды',
+      weights: { g_design: 1.5, g_visual: 1 },
+      riasec: { artistic: 0.3, conventional: 0.2 }
+    },
+    {
+      id: 'prod9', statement: 'Иллюстрации в стиле бренда и инфографика — моя сильная сторона',
+      weights: { g_visual: 2 },
+      riasec: { artistic: 0.4 }
+    },
+    {
+      id: 'prod10', statement: 'Согласование требований, приоритеты и написание ТЗ — мой конёк',
+      weights: { g_product: 2, g_design: 0.5 },
+      riasec: { enterprising: 0.3, conventional: 0.2 }
+    },
+    {
+      id: 'prod11', statement: 'Анимация интерфейсов и моушн-сцены привлекают меня',
+      weights: { g_visual: 1.5, g_design: 1 },
+      riasec: { artistic: 0.4 }
+    },
+    {
+      id: 'prod12', statement: 'Голосовые интерфейсы и чат-боты — интересная область продуктов',
+      weights: { g_product: 1.5, g_design: 1 },
+      riasec: { investigative: 0.2 }
+    },
+    {
+      id: 'prod13', statement: 'Прототипирование в Figma — мой второй дом, я живу в прототипах',
+      weights: { g_design: 2, g_visual: 0.5 },
+      riasec: { artistic: 0.3 }
     }
   ],
   marketing: [
@@ -281,6 +423,46 @@ export const STAGE2_QUESTIONS: Record<string, SpecializationQuestion[]> = {
       id: 'mkt5', statement: 'Помогать клиентам достигать целей с продуктом — моя миссия',
       weights: { g_sales: 1.5, g_brand: 0.5 },
       riasec: { social: 0.4 }
+    },
+    {
+      id: 'mkt6', statement: 'Настройка рекламных кампаний с тщательным контролем бюджета',
+      weights: { g_digital: 2 },
+      riasec: { conventional: 0.3, enterprising: 0.2 }
+    },
+    {
+      id: 'mkt7', statement: 'Разработка креативов и офферов для рекламы — моя зона',
+      weights: { g_digital: 1.5, g_brand: 1 },
+      riasec: { artistic: 0.3, enterprising: 0.2 }
+    },
+    {
+      id: 'mkt8', statement: 'Стратегия вывода нового продукта на рынок меня вдохновляет',
+      weights: { g_brand: 2, g_sales: 0.5 },
+      riasec: { enterprising: 0.4 }
+    },
+    {
+      id: 'mkt9', statement: 'Ведение клиентов по воронке и закрытие сделок — то, что меня заряжает',
+      weights: { g_sales: 2 },
+      riasec: { enterprising: 0.4, social: 0.2 }
+    },
+    {
+      id: 'mkt10', statement: 'SEO и органический трафик — мой конёк, люблю долгую игру',
+      weights: { g_digital: 2 },
+      riasec: { investigative: 0.2, conventional: 0.2 }
+    },
+    {
+      id: 'mkt11', statement: 'Партнёрства и коллаборации с другими брендами — интересная задача',
+      weights: { g_brand: 1.5, g_sales: 1 },
+      riasec: { social: 0.3, enterprising: 0.2 }
+    },
+    {
+      id: 'mkt12', statement: 'Работа с прессой и антикризисные коммуникации — моя зона ответственности',
+      weights: { g_brand: 2 },
+      riasec: { social: 0.3, enterprising: 0.2 }
+    },
+    {
+      id: 'mkt13', statement: 'Анализ конкурентов и позиционирование — с этого я начинаю любую задачу',
+      weights: { g_brand: 1.5, g_digital: 1 },
+      riasec: { investigative: 0.3 }
     }
   ],
   mgmt: [
@@ -308,6 +490,46 @@ export const STAGE2_QUESTIONS: Record<string, SpecializationQuestion[]> = {
       id: 'mgmt5', statement: 'Разрешение конфликтов и коммуникация со стейкхолдерами — моя суперсила',
       weights: { g_projects: 1.5, g_teams: 1 },
       riasec: { social: 0.3 }
+    },
+    {
+      id: 'mgmt6', statement: 'Найм, адаптация и развитие новых сотрудников — моя ответственность',
+      weights: { g_teams: 2 },
+      riasec: { social: 0.4 }
+    },
+    {
+      id: 'mgmt7', statement: 'Ведение стендапов, бэклога и ритма поставок — мой ежедневный ритм',
+      weights: { g_projects: 2 },
+      riasec: { conventional: 0.3 }
+    },
+    {
+      id: 'mgmt8', statement: 'Выбор технологического стека и оценка решений — моя компетенция',
+      weights: { g_architecture: 2, g_teams: 0.5 },
+      riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'mgmt9', statement: 'Построение OKR и контроль целей команды — мой инструмент управления',
+      weights: { g_teams: 2, g_projects: 1 },
+      riasec: { enterprising: 0.3 }
+    },
+    {
+      id: 'mgmt10', statement: 'Управление рисками и бюджетом проекта — я чувствую себя уверенно',
+      weights: { g_projects: 2, g_architecture: 0.5 },
+      riasec: { conventional: 0.3, enterprising: 0.2 }
+    },
+    {
+      id: 'mgmt11', statement: 'Реорганизация процессов внутри компании — интересная задача для меня',
+      weights: { g_teams: 1.5, g_projects: 1.5 },
+      riasec: { enterprising: 0.3 }
+    },
+    {
+      id: 'mgmt12', statement: 'Технические собеседования и оценка кандидатов — мне это нравится',
+      weights: { g_teams: 1.5, g_architecture: 1 },
+      riasec: { social: 0.2, investigative: 0.2 }
+    },
+    {
+      id: 'mgmt13', statement: 'Внедрение Agile-практик в команде — моя зона влияния',
+      weights: { g_projects: 2, g_teams: 0.5 },
+      riasec: { social: 0.2, conventional: 0.2 }
     }
   ],
   infra: [
@@ -335,6 +557,46 @@ export const STAGE2_QUESTIONS: Record<string, SpecializationQuestion[]> = {
       id: 'infra5', statement: 'Стабильность 24/7 и мониторинг — я готов(а) дежурить',
       weights: { g_devops: 1.5, g_ops: 1 },
       riasec: { conventional: 0.3 }
+    },
+    {
+      id: 'infra6', statement: 'Терраформ и инфраструктура как код — мой любимый инструмент',
+      weights: { g_devops: 2 },
+      riasec: { realistic: 0.3, investigative: 0.2 }
+    },
+    {
+      id: 'infra7', statement: 'Пентест и поиск уязвимостей — работа, где нужны хладнокровие и логика',
+      weights: { g_security: 2 },
+      riasec: { investigative: 0.4 }
+    },
+    {
+      id: 'infra8', statement: 'Балансировка нагрузки и оптимизация серверов — моя зона',
+      weights: { g_ops: 2, g_devops: 1 },
+      riasec: { realistic: 0.4 }
+    },
+    {
+      id: 'infra9', statement: 'Траблшутинг: находить первопричину инцидента — моя суперсила',
+      weights: { g_devops: 1.5, g_ops: 1.5 },
+      riasec: { investigative: 0.3 }
+    },
+    {
+      id: 'infra10', statement: 'Проектирование сетевой архитектуры офиса или ЦОД мне интересно',
+      weights: { g_ops: 2 },
+      riasec: { realistic: 0.3, conventional: 0.2 }
+    },
+    {
+      id: 'infra11', statement: 'Внедрение систем мониторинга и алертинга — моя задача',
+      weights: { g_devops: 2, g_ops: 0.5 },
+      riasec: { conventional: 0.3 }
+    },
+    {
+      id: 'infra12', statement: 'Обучение коллег работе с инструментами — мне это нравится',
+      weights: { g_support: 2, g_ops: 0.5 },
+      riasec: { social: 0.4 }
+    },
+    {
+      id: 'infra13', statement: 'Соответствие стандартам безопасности (ISO, PCI) — моя зона ответственности',
+      weights: { g_security: 2 },
+      riasec: { conventional: 0.4 }
     }
   ],
   people: [
@@ -361,6 +623,36 @@ export const STAGE2_QUESTIONS: Record<string, SpecializationQuestion[]> = {
     {
       id: 'people5', statement: 'Связь компании с техническим сообществом, митапы, контент — моя зона',
       weights: { g_docs: 2, g_hr: 0.5 },
+      riasec: { social: 0.3, artistic: 0.2 }
+    },
+    {
+      id: 'people6', statement: 'Проведение интервью и онбординг новичков — моя ежедневная работа',
+      weights: { g_hr: 2, g_docs: 0.5 },
+      riasec: { social: 0.4 }
+    },
+    {
+      id: 'people7', statement: 'Разработка программ обучения и треков развития — моя миссия',
+      weights: { g_hr: 2 },
+      riasec: { social: 0.4, investigative: 0.2 }
+    },
+    {
+      id: 'people8', statement: 'Внутренние коммуникации и корпоративная культура — моя зона',
+      weights: { g_hr: 1.5, g_docs: 1 },
+      riasec: { social: 0.4 }
+    },
+    {
+      id: 'people9', statement: 'База знаний и инструкции для команды — я люблю наводить порядок в информации',
+      weights: { g_docs: 2 },
+      riasec: { conventional: 0.4 }
+    },
+    {
+      id: 'people10', statement: 'Хантинг редких специалистов — задача, где нужны настойчивость и чутьё',
+      weights: { g_hr: 2 },
+      riasec: { enterprising: 0.3, social: 0.3 }
+    },
+    {
+      id: 'people11', statement: 'Конференции: подготовка спикеров и организация стенда — моё призвание',
+      weights: { g_docs: 1.5, g_hr: 1 },
       riasec: { social: 0.3, artistic: 0.2 }
     }
   ]
