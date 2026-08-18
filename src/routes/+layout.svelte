@@ -7,6 +7,7 @@
   import SkillsView from '$lib/components/views/SkillsView.svelte';
   import ResultsView from '$lib/components/views/ResultsView.svelte';
   import RoadmapView from '$lib/components/views/RoadmapView.svelte';
+  import ItmoResultsView from '$lib/components/views/ItmoResultsView.svelte';
 
   function goHome() {
     setView('start');
@@ -68,6 +69,8 @@
       <ResultsView />
     {:else if $view === 'roadmap'}
       <RoadmapView />
+    {:else if $view === 'itmo-results'}
+      <ItmoResultsView />
     {/if}
     <slot />
   </main>

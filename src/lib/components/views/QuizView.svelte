@@ -4,7 +4,7 @@
   import { onDestroy } from 'svelte';
   import {
     advanceQuestion, answerCurrent, backQuestion, confirmDirection, currentStageSize,
-    getQuestion, jumpToQuestion, quizAnswers, quizIndex, quizPhase, restartStage1,
+    getQuestion, itmoQuestions, jumpToQuestion, quizAnswers, quizIndex, quizPhase, restartStage1,
     selectAnswer, selectedDirection, stage1Total, topDirections
   } from '$lib/stores/profile';
   import { ANSWER_OPTIONS, DIRECTION_BY_ID, STAGE1_QUESTIONS, stage2QuestionsFor, type CareerDirection } from '$lib/data/directions';
@@ -15,7 +15,13 @@
   const question = $derived(getQuestion($quizIndex));
   const answers = $derived($quizAnswers ?? {});
   const stageSize = $derived(currentStageSize());
-  const questions = $derived(phase === 'stage1' ? STAGE1_QUESTIONS : stage2QuestionsFor($selectedDirection));
+  const questions = $derived(
+    phase === 'stage1'
+      ? STAGE1_QUESTIONS
+      : phase === 'stage3'
+        ? $itmoQuestions
+        : stage2QuestionsFor($selectedDirection)
+  );
   const progress = $derived(
     phase === 'stage1'
       ? (($quizIndex + 1) / stage1Total) * 50
@@ -91,16 +97,22 @@
     <div class="mb-2 flex items-center justify-between text-xs text-slate-500">
       <span>
         {#if phase === 'stage1'}
-          Тест 1 из 2 · Направление
+          Тест 1 из 3 · Направление
         {:else if phase === 'checkpoint'}
           Результат теста 1
+        {:else if phase === 'stage3'}
+          Тест 3 из 3 · Специализации ИТМО
         {:else}
-          Тест 2 из 2 · Специализация
+          Тест 2 из 3 · Специализация
         {/if}
       </span>
       {#if phase === 'stage2'}
         <span class="inline-flex items-center gap-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 font-medium text-indigo-300">
           {direction.title}
+        </span>
+      {:else if phase === 'stage3'}
+        <span class="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-300">
+          Случайная сборка
         </span>
       {:else if phase !== 'checkpoint'}
         <span class="inline-flex items-center gap-1">
@@ -117,7 +129,7 @@
     {#if phase !== 'checkpoint'}
       <div class="mt-3 flex items-center justify-between gap-3">
         <span class="text-xs font-medium text-slate-400">
-          Вопрос {phase === 'stage2' ? $quizIndex + 1 : $quizIndex + 1} из {questions.length}
+          Вопрос {$quizIndex + 1} из {questions.length}
           <span class="text-slate-600">· отвечено {stageAnswered}</span>
         </span>
         <span class="text-[11px] text-slate-600">нажмите на точку, чтобы перейти к вопросу</span>
@@ -200,6 +212,11 @@
             <div class="mb-2 text-xs font-medium uppercase tracking-wider text-indigo-400">
               {direction.title} · {Math.floor(($quizIndex / Math.max(1, questions.length)) * 3) + 1}-й блок из 3
             </div>
+          {:else if phase === 'stage3'}
+            <div class="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-emerald-400">
+              <span>{question?.directionId ? DIRECTION_BY_ID[question.directionId]?.title ?? '' : ''}</span>
+              <span class="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 font-medium normal-case text-emerald-300">программы ИТМО</span>
+            </div>
           {/if}
           <h2 class="text-lg font-semibold leading-snug text-slate-50 sm:text-xl">{question.statement}</h2>
         </div>
@@ -240,7 +257,11 @@
             disabled={phase === 'stage1' && $quizIndex === 0}
           >
             <ArrowLeft class="h-4 w-4" />
-            {phase === 'stage2' && $quizIndex === 0 ? 'К выбору направления' : 'Назад'}
+            {phase === 'stage2' && $quizIndex === 0
+              ? 'К выбору направления'
+              : phase === 'stage3' && $quizIndex === 0
+                ? 'К старту'
+                : 'Назад'}
           </button>
           {#if isCurrentAnswered}
             <button
@@ -251,7 +272,9 @@
                 ? 'Показать направление'
                 : phase === 'stage2' && $quizIndex === questions.length - 1
                   ? 'Перейти к навыкам'
-                  : 'Далее'}
+                  : phase === 'stage3' && $quizIndex === questions.length - 1
+                    ? 'Показать программы ИТМО'
+                    : 'Далее'}
               <ArrowRight class="h-4 w-4" />
             </button>
           {/if}

@@ -5,10 +5,14 @@ import {
   DIRECTIONS, DIRECTION_BY_ID, STAGE1_QUESTIONS, STAGE2_QUESTIONS,
   anchorVector, answerFactor, stage2QuestionsFor, type DirectionQuestion
 } from '../data/directions';
+import {
+  buildItmoTest, computeItmoScores, ITMO_PROGRAMS, itmoDirections,
+  type ItmoProgramScore, type ItmoTestQuestion
+} from '../data/itmo';
 import { findTopMatches } from '../engine/matching';
 
-export type View = 'start' | 'quiz' | 'skills' | 'results' | 'roadmap';
-export type QuizPhase = 'stage1' | 'checkpoint' | 'stage2';
+export type View = 'start' | 'quiz' | 'skills' | 'results' | 'roadmap' | 'itmo-results';
+export type QuizPhase = 'stage1' | 'checkpoint' | 'stage2' | 'stage3';
 
 const STORAGE_KEY = 'careervector_profile_v1';
 
@@ -47,7 +51,19 @@ export const currentSalary = writable('');
 export const profile = writable<UserProfileState | null>(loadStored());
 export const selectedRoleId = writable('');
 
+// ===================== ИТМО: ТЕСТ 3 =====================
+
+export const itmoQuestions = writable<ItmoTestQuestion[]>([]);
+export const itmoAnswers = writable<Record<string, string>>({});
+export const itmoMatches = writable<ItmoProgramScore[]>([]);
+
 export const stage1Total = STAGE1_QUESTIONS.length;
+
+function itmoQuestionsSync(): ItmoTestQuestion[] {
+  let q: ItmoTestQuestion[] = [];
+  itmoQuestions.subscribe((v) => (q = v))();
+  return q;
+}
 
 function phaseSync(): QuizPhase {
   let p: QuizPhase = 'stage1';
@@ -73,14 +89,20 @@ function answersSync(): Record<string, string> {
   return a;
 }
 
-export function getQuestion(index: number): DirectionQuestion {
-  return phaseSync() === 'stage2'
-    ? stage2QuestionsFor(directionSync())[index]
-    : STAGE1_QUESTIONS[index];
+export type StageQuestion = DirectionQuestion & { directionId?: string; priority?: number };
+
+export function getQuestion(index: number): StageQuestion {
+  const phase = phaseSync();
+  if (phase === 'stage2') return stage2QuestionsFor(directionSync())[index];
+  if (phase === 'stage3') return itmoQuestionsSync()[index] as unknown as StageQuestion;
+  return STAGE1_QUESTIONS[index];
 }
 
 export function currentStageSize(): number {
-  return phaseSync() === 'stage2' ? stage2QuestionsFor(directionSync()).length : STAGE1_QUESTIONS.length;
+  const phase = phaseSync();
+  if (phase === 'stage2') return stage2QuestionsFor(directionSync()).length;
+  if (phase === 'stage3') return itmoQuestionsSync().length;
+  return STAGE1_QUESTIONS.length;
 }
 
 // ===================== ТЕСТ 1: НАПРАВЛЕНИЯ =====================
@@ -174,6 +196,28 @@ export function computeRoleBoost(answers: Record<string, string>): Record<string
   return boost;
 }
 
+// ===================== ТЕСТ 3: СПЕЦИАЛИЗАЦИИ ИТМО =====================
+
+export function startItmoTest(directionIds?: string[]) {
+  const dirs = directionIds && directionIds.length > 0 ? directionIds : itmoDirections();
+  const test = buildItmoTest(dirs, 2, Math.random);
+  itmoQuestions.set(test);
+  itmoAnswers.set({});
+  itmoMatches.set([]);
+  quizIndex.set(0);
+  quizPhase.set('stage3');
+  view.set('quiz');
+}
+
+export function completeItmoTest() {
+  const questions = itmoQuestionsSync();
+  const answers = answersSync();
+  const scores = computeItmoScores(answers, questions, answerFactor);
+  itmoMatches.set(scores);
+  quizPhase.set('stage3');
+  view.set('itmo-results');
+}
+
 // ===================== НАВИГАЦИЯ ПО ТЕСТУ =====================
 
 export function startAudit() {
@@ -200,7 +244,11 @@ export function selectAnswer(optionId: string) {
 export function advanceQuestion() {
   const phase = phaseSync();
   const idx = indexSync();
-  if (phase === 'stage1') {
+  if (phase === 'stage3') {
+    const size = itmoQuestionsSync().length;
+    if (idx < size - 1) quizIndex.set(idx + 1);
+    else completeItmoTest();
+  } else if (phase === 'stage1') {
     if (idx < STAGE1_QUESTIONS.length - 1) quizIndex.set(idx + 1);
     else quizPhase.set('checkpoint');
   } else {
@@ -223,7 +271,10 @@ export function confirmDirection(directionId: string) {
 export function backQuestion() {
   const phase = phaseSync();
   const idx = indexSync();
-  if (phase === 'stage2') {
+  if (phase === 'stage3') {
+    if (idx > 0) quizIndex.set(idx - 1);
+    else view.set('start');
+  } else if (phase === 'stage2') {
     if (idx > 0) quizIndex.set(idx - 1);
     else quizPhase.set('checkpoint');
   } else if (phase === 'checkpoint') {
@@ -360,6 +411,9 @@ export function resetAll() {
   currentRole.set('');
   currentSalary.set('');
   selectedRoleId.set('');
+  itmoQuestions.set([]);
+  itmoAnswers.set({});
+  itmoMatches.set([]);
   quizIndex.set(0);
   quizPhase.set('stage1');
   view.set('start');

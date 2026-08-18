@@ -1,17 +1,37 @@
 ﻿<script lang="ts">
-  import { Radar, ShieldCheck, Sparkles, ListChecks, FileText, CircleGauge, ArrowRight, Split } from '@lucide/svelte';
-  import { profile, setView, startAudit } from '$lib/stores/profile';
+  import { Radar, ShieldCheck, Sparkles, ListChecks, FileText, CircleGauge, ArrowRight, GraduationCap } from '@lucide/svelte';
+  import { profile, setView, startAudit, startItmoTest } from '$lib/stores/profile';
   import { psychotypeCode, psychotypeLabel } from '$lib/engine/matching';
   import { ROLES } from '$lib/data/roles';
   import { STAGE1_QUESTIONS, STAGE2_QUESTIONS, DIRECTIONS } from '$lib/data/directions';
+  import { ITMO_PROGRAMS, itmoDirections } from '$lib/data/itmo';
 
   const stage2Total = Object.values(STAGE2_QUESTIONS).reduce((acc, qs) => acc + qs.length, 0);
   const stage2Sizes = Object.values(STAGE2_QUESTIONS).map((qs) => qs.length);
   const stage2Min = stage2Sizes.length ? Math.min(...stage2Sizes) : 0;
   const stage2Max = stage2Sizes.length ? Math.max(...stage2Sizes) : 0;
 
+  const itmoDirTitles: Record<string, string> = {
+    dev: 'Разработка',
+    data: 'Данные и аналитика',
+    infra: 'Инженерия и инфраструктура',
+    product: 'Продукт и дизайн',
+    mgmt: 'Менеджмент'
+  };
+
+  let itmoSelected = $state<string[]>(itmoDirections());
+
+  function toggleItmoDir(id: string) {
+    if (itmoSelected.includes(id)) itmoSelected = itmoSelected.filter((x) => x !== id);
+    else itmoSelected = [...itmoSelected, id];
+  }
+
+  function startItmo() {
+    startItmoTest(itmoSelected);
+  }
+
   const features = [
-    { icon: Split, title: '2 теста: направление → специализация', text: `Сначала тест из ${STAGE1_QUESTIONS.length} вопросов выберет ваше направление, затем ${stage2Min}–${stage2Max} вопросов уточнят специализацию — всего ${STAGE1_QUESTIONS.length + stage2Total}. Простые ответы «да / скорее да / скорее нет / нет».` },
+    { icon: ListChecks, title: '3 теста: направление → специализация → ИТМО', text: `Сначала тест из ${STAGE1_QUESTIONS.length} вопросов выберет направление, затем ${stage2Min}–${stage2Max} вопросов уточнят специализацию, а третий — случайная сборка вопросов — подберёт программы бакалавриата ИТМО из ${ITMO_PROGRAMS.length} в каталоге.` },
     { icon: CircleGauge, title: 'Векторный матчинг', text: `Сопоставление вашего психопрофиля RIASEC и скилл-сета с каталогом из ${ROLES.length}+ ролей.` },
     { icon: FileText, title: 'Скилл-гэп аудит', text: 'Разбор дефицита навыков с расчётом сроков перехода и зарплатной вилки.' },
     { icon: Radar, title: 'Радары компетенций', text: 'Наглядная карта ваших сильных сторон и точек роста относительно целевой роли.' },
@@ -20,9 +40,9 @@
 
   const stats = [
     { value: `${ROLES.length}+`, label: 'ролей в каталоге' },
-    { value: `${DIRECTIONS.length}`, label: 'направлений · 2 теста' },
-    { value: `${STAGE1_QUESTIONS.length + stage2Total}`, label: 'вопросов да/нет' },
-    { value: '0', label: 'байт данных на сервере' }
+    { value: `${DIRECTIONS.length}`, label: 'направлений · 3 теста' },
+    { value: `${STAGE1_QUESTIONS.length + stage2Total}`, label: 'вопросов в аудите' },
+    { value: `${ITMO_PROGRAMS.length}`, label: 'программ ИТМО в тесте 3' }
   ];
 </script>
 
@@ -80,6 +100,39 @@
 
   <section class="mt-12 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
     <h2 class="flex items-center gap-2 text-sm font-semibold text-emerald-300">
+      <GraduationCap class="h-4 w-4" />
+      Тест 3 · Специализации ИТМО
+    </h2>
+    <p class="mt-2 text-sm leading-relaxed text-slate-400">
+      Случайная сборка: по 2 вопроса из каждого выбранного направления, затем общая перетасовка.
+      Баллы взвешиваются по приоритету программ — в конце вы получите топ программ бакалавриата
+      Университета ИТМО под ваш профиль (по данным abit.itmo.ru).
+    </p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      {#each itmoDirections() as dirId}
+        <button
+          onclick={() => toggleItmoDir(dirId)}
+          class="rounded-full border px-3 py-1.5 text-xs font-medium transition
+            {itmoSelected.includes(dirId)
+              ? 'border-emerald-500/50 bg-emerald-500/15 text-emerald-300'
+              : 'border-slate-700 bg-slate-900/60 text-slate-500 hover:border-slate-600'}"
+        >
+          {itmoDirTitles[dirId] ?? dirId}
+        </button>
+      {/each}
+    </div>
+    <button
+      onclick={startItmo}
+      disabled={itmoSelected.length === 0}
+      class="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <GraduationCap class="h-4 w-4" />
+      Пройти тест ИТМО ({itmoSelected.length * 2} вопросов)
+    </button>
+  </section>
+
+  <section class="mt-12 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+    <h2 class="flex items-center gap-2 text-sm font-semibold text-indigo-300">
       <ShieldCheck class="h-4 w-4" />
       Приватность — архитектурный принцип
     </h2>
