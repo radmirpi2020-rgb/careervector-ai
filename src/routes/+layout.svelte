@@ -1,6 +1,6 @@
 ﻿<script lang="ts">
   import '../app.css';
-  import { Compass, RefreshCw, LayoutDashboard, Home } from '@lucide/svelte';
+  import { Compass, RefreshCw, LayoutDashboard, Home, GraduationCap } from '@lucide/svelte';
   import { profile, resetAll, setView, startAudit, view } from '$lib/stores/profile';
   import StartView from '$lib/components/views/StartView.svelte';
   import QuizView from '$lib/components/views/QuizView.svelte';
@@ -19,11 +19,13 @@
   }
 </script>
 
-<div class="min-h-screen bg-slate-950 text-slate-200">
-  <header class="sticky top-0 z-20 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur">
+<div class="bg-slate-950 text-slate-200">
+  <div class="bg-aurora pointer-events-none fixed inset-0 -z-10" aria-hidden="true"></div>
+
+  <header class="sticky top-0 z-20 border-b border-slate-800/60 bg-slate-950/70 backdrop-blur-xl">
     <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-      <button onclick={goHome} class="flex items-center gap-2.5 text-left">
-        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500">
+      <button onclick={goHome} class="group flex items-center gap-2.5 text-left">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 shadow-lg shadow-indigo-500/30 transition group-hover:scale-105">
           <Compass class="h-5 w-5 text-white" />
         </span>
         <span class="hidden sm:block">
@@ -31,7 +33,7 @@
           <span class="block text-[10px] leading-tight text-slate-500">навигатор карьерных траекторий</span>
         </span>
       </button>
-      <nav class="flex items-center gap-2">
+      <nav class="flex items-center gap-1.5">
         <button
           onclick={goHome}
           class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
@@ -45,6 +47,13 @@
         >
           <LayoutDashboard class="h-3.5 w-3.5" />
           <span class="hidden sm:inline">Результаты</span>
+        </button>
+        <button
+          onclick={() => setView('itmo-results')}
+          class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+        >
+          <GraduationCap class="h-3.5 w-3.5" />
+          <span class="hidden sm:inline">ИТМО</span>
         </button>
         <button
           onclick={resetAll}
@@ -75,13 +84,20 @@
     <slot />
   </main>
 
-  <footer class="border-t border-slate-800/80 py-8">
+  <footer class="border-t border-slate-800/60 py-10">
     <div class="mx-auto max-w-6xl px-4 text-center">
-      <p class="text-xs text-slate-600">
+      <div class="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 shadow-lg shadow-indigo-500/20">
+        <Compass class="h-5 w-5 text-white" />
+      </div>
+      <p class="text-xs text-slate-500">
         CareerVector AI v1.0 MVP · Zero-Knowledge Profiling: все данные хранятся локально в вашем браузере
       </p>
-      <p class="mt-1 text-[11px] text-slate-700">
-        Векторное сопоставление RIASEC · TFI-индекс реализуемости перехода · онтология 150+ ролей
+      <p class="mt-1.5 text-[11px] text-slate-600">
+        Векторное сопоставление RIASEC · TFI-индекс реализуемости перехода · онтология 150+ ролей ·
+        каталог программ ИТМО
+      </p>
+      <p class="mt-4 text-[11px] text-slate-700">
+        Сделано с любовью к данным и приватности · 2 теста на психотип + 1 тест на специализации ИТМО
       </p>
     </div>
   </footer>
