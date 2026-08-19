@@ -1,7 +1,7 @@
 ﻿<script lang="ts">
   import '../app.css';
-  import { Compass, RefreshCw, LayoutDashboard, Home, GraduationCap, Library } from '@lucide/svelte';
-  import { profile, resetAll, setView, startAudit, view } from '$lib/stores/profile';
+  import { Compass, RefreshCw, LayoutDashboard, Home, GraduationCap, Library, Hand } from '@lucide/svelte';
+  import { profile, resetAll, setView, startAudit, startItmoSwipe, view } from '$lib/stores/profile';
   import StartView from '$lib/components/views/StartView.svelte';
   import QuizView from '$lib/components/views/QuizView.svelte';
   import SkillsView from '$lib/components/views/SkillsView.svelte';
@@ -9,6 +9,7 @@
   import RoadmapView from '$lib/components/views/RoadmapView.svelte';
   import ItmoResultsView from '$lib/components/views/ItmoResultsView.svelte';
   import ItmoCatalogView from '$lib/components/views/ItmoCatalogView.svelte';
+  import ItmoSwipeView from '$lib/components/views/ItmoSwipeView.svelte';
 
   function goHome() {
     setView('start');
@@ -57,6 +58,13 @@
           <span class="hidden sm:inline">Каталог ИТМО</span>
         </button>
         <button
+          onclick={startItmoSwipe}
+          class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-emerald-400/90 transition hover:bg-emerald-500/10 hover:text-emerald-300"
+        >
+          <Hand class="h-3.5 w-3.5" />
+          <span class="hidden sm:inline">Свайп-тест</span>
+        </button>
+        <button
           onclick={() => setView('itmo-results')}
           class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
         >
@@ -90,6 +98,8 @@
       <ItmoResultsView />
     {:else if $view === 'itmo-catalog'}
       <ItmoCatalogView />
+    {:else if $view === 'itmo-swipe'}
+      <ItmoSwipeView />
     {/if}
     <slot />
   </main>

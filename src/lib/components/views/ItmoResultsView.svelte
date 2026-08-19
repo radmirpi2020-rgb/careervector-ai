@@ -1,12 +1,13 @@
 <script lang="ts">
   import { GraduationCap, Home, Library, RefreshCw, Star, Trophy } from '@lucide/svelte';
-  import { itmoMatches, itmoQuestions, setView, startItmoTest } from '$lib/stores/profile';
+  import { itmoMatches, itmoSwipeAnswers, setView, startItmoSwipe } from '$lib/stores/profile';
+  import { ITMO_SWIPE_TOTAL_QUESTIONS } from '$lib/data/itmo';
 
   const matches = $derived($itmoMatches ?? []);
-  const asked = $derived($itmoQuestions.length);
+  const answered = $derived(Object.keys($itmoSwipeAnswers ?? {}).length);
 
   function again() {
-    startItmoTest();
+    startItmoSwipe();
   }
 </script>
 
@@ -17,8 +18,9 @@
     </div>
     <h1 class="text-2xl font-bold text-slate-50 sm:text-3xl">Программы ИТМО под ваш профиль</h1>
     <p class="mx-auto mt-2 max-w-md text-sm text-slate-400">
-      По {asked} вопросам случайной сборки, взвешенным по приоритету программ.
-      Каждый тест собирается заново — результат меняется, но топ-направление остаётся стабильным.
+      По {answered} свайпам из {ITMO_SWIPE_TOTAL_QUESTIONS} утверждений свайп-теста.
+      Каждая часть — свои программы, поэтому результат стабилен: отвеченные части всегда дают
+      один и тот же топ.
     </p>
   </div>
 
@@ -52,7 +54,7 @@
                 <p class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
                   <span class="font-mono text-slate-400">{m.program.code}</span>
                   <span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
-                    {m.directionTitle}
+                    {m.partTitle ?? m.directionTitle}
                   </span>
                   <span class="inline-flex items-center gap-0.5" title="Приоритет программы (1–5)">
                     {#each Array.from({ length: 5 }) as _, k}
@@ -81,7 +83,7 @@
         class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-400"
       >
         <RefreshCw class="h-4 w-4" />
-        Собрать новый тест
+        Пройти свайп-тест заново
       </button>
       <button
         onclick={() => setView('itmo-catalog')}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  buildItmoTest, computeItmoScores, ITMO_PROGRAMS, itmoDirections, seededRngFactory,
-  itmoRequirements, ITMO_EXAM_SETS
+  buildItmoTest, computeItmoScores, computeItmoSwipeScores, ITMO_PROGRAMS, ITMO_SWIPE_PARTS,
+  itmoDirections, seededRngFactory, itmoRequirements, ITMO_EXAM_SETS
 } from '../data/itmo';
 import { STAGE2_QUESTIONS } from '../data/directions';
 
@@ -129,5 +129,94 @@ describe('computeItmoScores', () => {
     const test = buildItmoTest(['dev'], 2, Math.random);
     const scores = computeItmoScores({}, test, factorOf);
     expect(scores).toHaveLength(0);
+  });
+});
+
+describe('свайп-тест ИТМО', () => {
+  it('каждая программа каталога относится ровно к одной части', () => {
+    const programParts = new Map<string, string[]>();
+    for (const part of ITMO_SWIPE_PARTS) {
+      for (const pid of part.programIds) {
+        const list = programParts.get(pid) ?? [];
+        list.push(part.id);
+        programParts.set(pid, list);
+      }
+    }
+    expect(programParts.size).toBe(ITMO_PROGRAMS.length);
+    for (const [pid, parts] of programParts) {
+      expect(parts.length).toBe(1);
+    }
+  });
+
+  it('части не пустые и содержат уникальные вопросы (итого 32)', () => {
+    const all = ITMO_SWIPE_PARTS.flatMap((p) => p.questions);
+    const ids = new Set(all.map((q) => q.id));
+    for (const part of ITMO_SWIPE_PARTS) {
+      expect(part.programIds.length).toBeGreaterThan(0);
+      expect(part.questions.length).toBeGreaterThanOrEqual(2);
+      for (const q of part.questions) expect(q.statement.trim().length).toBeGreaterThan(10);
+    }
+    expect(ids.size).toBe(all.length);
+    const total = ITMO_SWIPE_PARTS.reduce((acc, p) => acc + p.questions.length, 0);
+    expect(total).toBe(32);
+  });
+
+  it('все программы частей существуют в каталоге (23)', () => {
+    const ids = new Set(ITMO_PROGRAMS.map((p) => p.id));
+    for (const part of ITMO_SWIPE_PARTS) {
+      for (const pid of part.programIds) expect(ids.has(pid)).toBe(true);
+    }
+  });
+
+  it('все „да" в одной части дают 100% только программам этой части', () => {
+    const answers: Record<string, boolean> = {};
+    const first = ITMO_SWIPE_PARTS[0];
+    for (const q of first.questions) answers[q.id] = true;
+    const scores = computeItmoSwipeScores(answers);
+    const partPrograms = new Set(first.programIds);
+    expect(scores.length).toBe(partPrograms.size);
+    for (const s of scores) {
+      expect(partPrograms.has(s.program.id)).toBe(true);
+      expect(s.percent).toBe(100);
+      expect(s.partTitle).toBe(first.title);
+    }
+  });
+
+  it('без ответов — пустой результат', () => {
+    expect(computeItmoSwipeScores({})).toHaveLength(0);
+  });
+
+  it('частичные ответы дают процент = доля согласий', () => {
+    const first = ITMO_SWIPE_PARTS[0];
+    const answers: Record<string, boolean> = {};
+    first.questions.forEach((q, i) => {
+      answers[q.id] = i % 2 === 0;
+    });
+    const scores = computeItmoSwipeScores(answers);
+    const expected = Math.round((Math.ceil(first.questions.length / 2) / first.questions.length) * 100);
+    const scoresOfPart = scores.filter((s) => s.partId === first.id);
+    expect(scoresOfPart).toHaveLength(first.programIds.length);
+    for (const s of scoresOfPart) expect(s.percent).toBe(expected);
+  });
+
+  it('смешанные части: каждая часть влияет только на свои программы', () => {
+    const answers: Record<string, boolean> = {};
+    for (const q of ITMO_SWIPE_PARTS[0].questions) answers[q.id] = true;
+    for (const q of ITMO_SWIPE_PARTS[1].questions) answers[q.id] = false;
+    const scores = computeItmoSwipeScores(answers);
+    const top = scores[0];
+    expect(top.percent).toBe(100);
+    expect(top.partId).toBe(ITMO_SWIPE_PARTS[0].id);
+    const secondPartPrograms = new Set(ITMO_SWIPE_PARTS[1].programIds);
+    for (const s of scores) {
+      if (!secondPartPrograms.has(s.program.id)) continue;
+      expect(s.percent).toBe(0);
+    }
+  });
+
+  it('срез не превышает 8 программ', () => {
+    const answers: Record<string, boolean> = {};
+    for (const part of ITMO_SWIPE_PARTS) for (const q of part.questions) answers[q.id] = true;
+    expect(computeItmoSwipeScores(answers).length).toBeLessThanOrEqual(8);
   });
 });

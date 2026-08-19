@@ -198,6 +198,9 @@ export interface ItmoProgramScore {
   directionTitle: string;
   score: number;
   percent: number;
+  /** Часть свайп-теста (только для свайп-скоринга) */
+  partId?: string;
+  partTitle?: string;
 }
 
 export function computeItmoScores(
@@ -240,4 +243,173 @@ export function computeItmoScores(
 
 export function seededRngFactory(seed: number): () => number {
   return seededRng(seed);
+}
+
+// ===================== СВАЙП-ТЕСТ ИТМО (ТЕСТ 3-Б) =====================
+
+export interface ItmoSwipePart {
+  id: string;
+  title: string;
+  emoji: string;
+  programIds: string[];
+  questions: ItmoTestQuestion[];
+}
+
+/**
+ * Свайп-форма теста ИТМО: все программы каталога разбиты на 8 частей-тем.
+ * Каждая часть — свои уникальные утверждения «да/нет»; часть можно пропустить.
+ * Скоринг считается только по частям, где были ответы.
+ */
+export const ITMO_SWIPE_PARTS: ItmoSwipePart[] = [
+  {
+    id: 'dev',
+    title: 'Разработка ПО',
+    emoji: '💻',
+    programIds: ['itmo_software', 'itmo_sys_sw', 'itmo_cst', 'itmo_neuro'],
+    questions: [
+      { id: 'swipe_dev1', directionId: 'dev', statement: 'Я готов(а) писать production-код каждый день и доводить задачи до продакшена', priority: 5 },
+      { id: 'swipe_dev2', directionId: 'dev', statement: 'Мне интересны архитектура, бэкенд и распределённые системы', priority: 5 },
+      { id: 'swipe_dev3', directionId: 'dev', statement: 'Хочу разбираться в ядре инженерной разработки: ОС, компиляторы, сети', priority: 4 },
+      { id: 'swipe_dev4', directionId: 'dev', statement: 'Программирование на стыке с нейронаукой и биосигналами меня привлекает', priority: 4 },
+      { id: 'swipe_dev5', directionId: 'dev', statement: 'Оптимизация кода, чистота и надёжность приложения — мой стандарт', priority: 5 }
+    ]
+  },
+  {
+    id: 'games',
+    title: 'Игры и автоматизация',
+    emoji: '🎮',
+    programIds: ['itmo_games', 'itmo_cloud_dev'],
+    questions: [
+      { id: 'swipe_games1', directionId: 'dev', statement: 'Создание игр — движки, геймдизайн, графика — то, чем хочу заниматься', priority: 4 },
+      { id: 'swipe_games2', directionId: 'dev', statement: 'Автоматизация процесса разработки и жизненный цикл ИС мне интересны', priority: 3 },
+      { id: 'swipe_games3', directionId: 'dev', statement: 'Хочу, чтобы моя работа приносила видимый игровой или продуктовый результат', priority: 4 }
+    ]
+  },
+  {
+    id: 'ai',
+    title: 'Искусственный интеллект',
+    emoji: '🤖',
+    programIds: ['itmo_ml', 'itmo_ai_eng', 'itmo_comp_tech', 'itmo_llm'],
+    questions: [
+      { id: 'swipe_ai1', directionId: 'data', statement: 'ИИ для меня — способ мышления и построения решений, а не просто инструмент', priority: 5 },
+      { id: 'swipe_ai2', directionId: 'data', statement: 'Хочу строить и эксплуатировать ИИ-системы в реальном масштабе', priority: 5 },
+      { id: 'swipe_ai3', directionId: 'data', statement: 'Математические модели, алгоритмы и обработка данных — моя сильная сторона', priority: 4 },
+      { id: 'swipe_ai4', directionId: 'data', statement: 'Языковые модели: от промпт-инжиниринга до обучения — моя сфера интереса', priority: 4 },
+      { id: 'swipe_ai5', directionId: 'data', statement: 'Мне нравится объяснять, как работают модели, и оценивать их качество', priority: 4 }
+    ]
+  },
+  {
+    id: 'science',
+    title: 'Наука и исследования',
+    emoji: '🔬',
+    programIds: ['itmo_physics', 'itmo_chem', 'itmo_bio', 'itmo_eco'],
+    questions: [
+      { id: 'swipe_sci1', directionId: 'data', statement: 'Физика как способ понимать мир: теория, эксперименты, расчёты — моё', priority: 3 },
+      { id: 'swipe_sci2', directionId: 'data', statement: 'Исследовательская работа и публикации привлекают больше, чем продакшн', priority: 3 },
+      { id: 'swipe_sci3', directionId: 'data', statement: 'Цифровые методы в химии и R&D — мой интерес', priority: 3 },
+      { id: 'swipe_sci4', directionId: 'data', statement: 'Люблю ставить эксперименты и доводить результаты до измеримых выводов', priority: 3 },
+      { id: 'swipe_sci5', directionId: 'data', statement: 'Инженерия на стыке с биологией: биотехнические системы — моя тема', priority: 3 },
+      { id: 'swipe_sci6', directionId: 'data', statement: 'Экология и устойчивое развитие с опорой на данные — моё направление', priority: 2 }
+    ]
+  },
+  {
+    id: 'security',
+    title: 'Безопасность и фотоника',
+    emoji: '🛡️',
+    programIds: ['itmo_sec', 'itmo_photonics', 'itmo_laser', 'itmo_nano'],
+    questions: [
+      { id: 'swipe_sec1', directionId: 'infra', statement: 'Защита данных, сетей и систем — сфера, где хочу развиваться', priority: 5 },
+      { id: 'swipe_sec2', directionId: 'infra', statement: 'Оптика, лазеры и фоточувствительные системы меня впечатляют', priority: 4 },
+      { id: 'swipe_sec3', directionId: 'infra', statement: 'Готов(а) работать «ближе к железу» и физике, а не только к софту', priority: 4 },
+      { id: 'swipe_sec4', directionId: 'infra', statement: 'Наноматериалы и микроэлектронные структуры — мой интерес', priority: 3 },
+      { id: 'swipe_sec5', directionId: 'infra', statement: 'Обеспечение стабильности и безопасности систем — мой профиль ответственности', priority: 4 }
+    ]
+  },
+  {
+    id: 'robotics',
+    title: 'Робототехника',
+    emoji: '🦾',
+    programIds: ['itmo_robotics'],
+    questions: [
+      { id: 'swipe_rob1', directionId: 'infra', statement: 'Роботы, мехатроника и автономные системы управления — моя мечта', priority: 4 },
+      { id: 'swipe_rob2', directionId: 'infra', statement: 'Хочу проектировать системы, которые двигаются и взаимодействуют с миром', priority: 4 }
+    ]
+  },
+  {
+    id: 'product',
+    title: 'Продукт и дизайн',
+    emoji: '🎨',
+    programIds: ['itmo_design_dev', 'itmo_design'],
+    questions: [
+      { id: 'swipe_prod1', directionId: 'product', statement: 'Хочу соединять код и дизайн: интерактивные и генеративные системы', priority: 5 },
+      { id: 'swipe_prod2', directionId: 'product', statement: 'UX/UI, предметный и цифровой дизайн — моя сфера', priority: 4 },
+      { id: 'swipe_prod3', directionId: 'product', statement: 'Мне важно, чтобы продукт был красивым и удобным до мелочей', priority: 4 }
+    ]
+  },
+  {
+    id: 'business',
+    title: 'Бизнес и инновации',
+    emoji: '📊',
+    programIds: ['itmo_bizinf', 'itmo_innov'],
+    questions: [
+      { id: 'swipe_biz1', directionId: 'mgmt', statement: 'ИТ и бизнес: архитектура процессов, аналитика, управление — моя тема', priority: 5 },
+      { id: 'swipe_biz2', directionId: 'mgmt', statement: 'Технологическое предпринимательство и управление инновациями меня заряжают', priority: 4 },
+      { id: 'swipe_biz3', directionId: 'mgmt', statement: 'Хочу влиять на решения компании, а не только на код', priority: 4 }
+    ]
+  }
+];
+
+export const ITMO_SWIPE_DIRECTION: Record<string, string> = {
+  dev: 'Разработка', data: 'Данные и аналитика', product: 'Продукт и дизайн',
+  marketing: 'Маркетинг и продажи', mgmt: 'Менеджмент', infra: 'Инженерия и инфраструктура',
+  people: 'Люди и обучение'
+};
+
+export const ITMO_SWIPE_TOTAL_QUESTIONS = ITMO_SWIPE_PARTS.reduce(
+  (acc, p) => acc + p.questions.length,
+  0
+);
+
+export interface ItmoSwipeScore extends ItmoProgramScore {
+  partId: string;
+  partTitle: string;
+}
+
+/**
+ * Скоринг свайп-теста: каждый ответ «да» поднимает все программы своей части.
+ * Части без ответов не участвуют в выдаче.
+ */
+export function computeItmoSwipeScores(answers: Record<string, boolean>): ItmoSwipeScore[] {
+  const counts = new Map<string, { yes: number; total: number }>();
+  for (const part of ITMO_SWIPE_PARTS) {
+    for (const q of part.questions) {
+      const answered = answers[q.id];
+      if (answered === undefined) continue;
+      for (const pid of part.programIds) {
+        const c = counts.get(pid) ?? { yes: 0, total: 0 };
+        c.total += 1;
+        if (answered) c.yes += 1;
+        counts.set(pid, c);
+      }
+    }
+  }
+
+  return ITMO_PROGRAMS.flatMap((p) => {
+    const part = ITMO_SWIPE_PARTS.find((pt) => pt.programIds.includes(p.id));
+    if (!part) return [];
+    const c = counts.get(p.id) ?? { yes: 0, total: 0 };
+    if (c.total === 0) return [];
+    return [
+      {
+        program: p,
+        directionTitle: ITMO_SWIPE_DIRECTION[p.directionId] ?? p.directionId,
+        partId: part.id,
+        partTitle: part.title,
+        score: c.yes,
+        percent: Math.round((c.yes / c.total) * 100)
+      }
+    ];
+  })
+    .sort((a, b) => b.percent - a.percent || b.program.priority - a.program.priority)
+    .slice(0, 8);
 }

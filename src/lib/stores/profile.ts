@@ -6,12 +6,12 @@ import {
   anchorVector, answerFactor, stage2QuestionsFor, type DirectionQuestion
 } from '../data/directions';
 import {
-  buildItmoTest, computeItmoScores, ITMO_PROGRAMS, itmoDirections,
-  type ItmoProgramScore, type ItmoTestQuestion
+  buildItmoTest, computeItmoScores, computeItmoSwipeScores, ITMO_PROGRAMS, ITMO_SWIPE_PARTS,
+  itmoDirections, type ItmoProgramScore, type ItmoSwipePart, type ItmoTestQuestion
 } from '../data/itmo';
 import { findTopMatches } from '../engine/matching';
 
-export type View = 'start' | 'quiz' | 'skills' | 'results' | 'roadmap' | 'itmo-results' | 'itmo-catalog';
+export type View = 'start' | 'quiz' | 'skills' | 'results' | 'roadmap' | 'itmo-results' | 'itmo-catalog' | 'itmo-swipe';
 export type QuizPhase = 'stage1' | 'checkpoint' | 'stage2' | 'stage3';
 
 const STORAGE_KEY = 'careervector_profile_v1';
@@ -56,6 +56,90 @@ export const selectedRoleId = writable('');
 export const itmoQuestions = writable<ItmoTestQuestion[]>([]);
 export const itmoAnswers = writable<Record<string, string>>({});
 export const itmoMatches = writable<ItmoProgramScore[]>([]);
+
+// ===================== СВАЙП-ТЕСТ ИТМО (ТЕСТ 3-Б) =====================
+
+export const itmoParts = writable<ItmoSwipePart[]>([]);
+export const itmoPartIndex = writable(0);
+export const itmoCardIndex = writable(0);
+export const itmoSwipeAnswers = writable<Record<string, boolean>>({});
+
+function itmoPartsSync(): ItmoSwipePart[] {
+  let p: ItmoSwipePart[] = [];
+  itmoParts.subscribe((v) => (p = v))();
+  return p;
+}
+
+function itmoPartIndexSync(): number {
+  let i = 0;
+  itmoPartIndex.subscribe((v) => (i = v))();
+  return i;
+}
+
+function itmoCardIndexSync(): number {
+  let i = 0;
+  itmoCardIndex.subscribe((v) => (i = v))();
+  return i;
+}
+
+function swipeAnswersSync(): Record<string, boolean> {
+  let a: Record<string, boolean> = {};
+  itmoSwipeAnswers.subscribe((v) => (a = v))();
+  return a;
+}
+
+export function startItmoSwipe() {
+  itmoParts.set(ITMO_SWIPE_PARTS);
+  itmoPartIndex.set(0);
+  itmoCardIndex.set(0);
+  itmoSwipeAnswers.set({});
+  itmoMatches.set([]);
+  view.set('itmo-swipe');
+}
+
+function advanceItmoPart() {
+  const parts = itmoPartsSync();
+  const pi = itmoPartIndexSync();
+  if (pi < parts.length - 1) {
+    itmoPartIndex.set(pi + 1);
+    itmoCardIndex.set(0);
+  } else {
+    finishItmoSwipe();
+  }
+}
+
+export function answerSwipe(qid: string, yes: boolean) {
+  const answers = { ...swipeAnswersSync() };
+  answers[qid] = yes;
+  itmoSwipeAnswers.set(answers);
+  const parts = itmoPartsSync();
+  const pi = itmoPartIndexSync();
+  const ci = itmoCardIndexSync();
+  const part = parts[pi];
+  if (!part) return;
+  if (ci < part.questions.length - 1) {
+    itmoCardIndex.set(ci + 1);
+  } else {
+    advanceItmoPart();
+  }
+}
+
+export function skipItmoPart() {
+  advanceItmoPart();
+}
+
+export function goItmoPart(index: number) {
+  const parts = itmoPartsSync();
+  if (index >= 0 && index < parts.length) {
+    itmoPartIndex.set(index);
+    itmoCardIndex.set(0);
+  }
+}
+
+export function finishItmoSwipe() {
+  itmoMatches.set(computeItmoSwipeScores(swipeAnswersSync()));
+  view.set('itmo-results');
+}
 
 export const stage1Total = STAGE1_QUESTIONS.length;
 
@@ -414,6 +498,10 @@ export function resetAll() {
   itmoQuestions.set([]);
   itmoAnswers.set({});
   itmoMatches.set([]);
+  itmoParts.set([]);
+  itmoPartIndex.set(0);
+  itmoCardIndex.set(0);
+  itmoSwipeAnswers.set({});
   quizIndex.set(0);
   quizPhase.set('stage1');
   view.set('start');
