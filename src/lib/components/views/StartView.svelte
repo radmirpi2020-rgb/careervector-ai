@@ -1,5 +1,5 @@
 ﻿<script lang="ts">
-  import { Radar, ShieldCheck, Sparkles, ListChecks, FileText, CircleGauge, ArrowRight, GraduationCap, ChevronDown } from '@lucide/svelte';
+  import { Radar, ShieldCheck, Sparkles, ListChecks, FileText, CircleGauge, ArrowRight, GraduationCap, ChevronDown, Library } from '@lucide/svelte';
   import { profile, setView, startAudit, startItmoTest } from '$lib/stores/profile';
   import { psychotypeCode, psychotypeLabel } from '$lib/engine/matching';
   import { ROLES } from '$lib/data/roles';
@@ -147,14 +147,23 @@
           </button>
         {/each}
       </div>
-      <button
-        onclick={startItmo}
-        disabled={itmoSelected.length === 0}
-        class="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <GraduationCap class="h-4 w-4" />
-        Пройти тест ИТМО ({itmoSelected.length * 2} вопросов)
-      </button>
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <button
+          onclick={startItmo}
+          disabled={itmoSelected.length === 0}
+          class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <GraduationCap class="h-4 w-4" />
+          Пройти тест ИТМО ({itmoSelected.length * 2} вопросов)
+        </button>
+        <button
+          onclick={() => setView('itmo-catalog')}
+          class="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-300 transition hover:-translate-y-0.5 hover:border-indigo-500/50 hover:text-indigo-300"
+        >
+          <Library class="h-4 w-4" />
+          Каталог программ и требования ЕГЭ
+        </button>
+      </div>
     </div>
   </section>
 

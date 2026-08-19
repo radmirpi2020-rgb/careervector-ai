@@ -11,7 +11,7 @@ import {
 } from '../data/itmo';
 import { findTopMatches } from '../engine/matching';
 
-export type View = 'start' | 'quiz' | 'skills' | 'results' | 'roadmap' | 'itmo-results';
+export type View = 'start' | 'quiz' | 'skills' | 'results' | 'roadmap' | 'itmo-results' | 'itmo-catalog';
 export type QuizPhase = 'stage1' | 'checkpoint' | 'stage2' | 'stage3';
 
 const STORAGE_KEY = 'careervector_profile_v1';

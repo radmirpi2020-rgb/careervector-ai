@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GraduationCap, Home, RefreshCw, Star, Trophy } from '@lucide/svelte';
+  import { GraduationCap, Home, Library, RefreshCw, Star, Trophy } from '@lucide/svelte';
   import { itmoMatches, itmoQuestions, setView, startItmoTest } from '$lib/stores/profile';
 
   const matches = $derived($itmoMatches ?? []);
@@ -82,6 +82,13 @@
       >
         <RefreshCw class="h-4 w-4" />
         Собрать новый тест
+      </button>
+      <button
+        onclick={() => setView('itmo-catalog')}
+        class="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-5 py-2.5 text-sm text-slate-300 transition hover:bg-slate-800"
+      >
+        <Library class="h-4 w-4" />
+        Весь каталог и требования ЕГЭ
       </button>
       <button
         onclick={() => setView('start')}

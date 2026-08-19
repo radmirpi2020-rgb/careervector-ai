@@ -1,6 +1,6 @@
 ﻿<script lang="ts">
   import '../app.css';
-  import { Compass, RefreshCw, LayoutDashboard, Home, GraduationCap } from '@lucide/svelte';
+  import { Compass, RefreshCw, LayoutDashboard, Home, GraduationCap, Library } from '@lucide/svelte';
   import { profile, resetAll, setView, startAudit, view } from '$lib/stores/profile';
   import StartView from '$lib/components/views/StartView.svelte';
   import QuizView from '$lib/components/views/QuizView.svelte';
@@ -8,6 +8,7 @@
   import ResultsView from '$lib/components/views/ResultsView.svelte';
   import RoadmapView from '$lib/components/views/RoadmapView.svelte';
   import ItmoResultsView from '$lib/components/views/ItmoResultsView.svelte';
+  import ItmoCatalogView from '$lib/components/views/ItmoCatalogView.svelte';
 
   function goHome() {
     setView('start');
@@ -49,6 +50,13 @@
           <span class="hidden sm:inline">Результаты</span>
         </button>
         <button
+          onclick={() => setView('itmo-catalog')}
+          class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+        >
+          <Library class="h-3.5 w-3.5" />
+          <span class="hidden sm:inline">Каталог ИТМО</span>
+        </button>
+        <button
           onclick={() => setView('itmo-results')}
           class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
         >
@@ -80,6 +88,8 @@
       <RoadmapView />
     {:else if $view === 'itmo-results'}
       <ItmoResultsView />
+    {:else if $view === 'itmo-catalog'}
+      <ItmoCatalogView />
     {/if}
     <slot />
   </main>

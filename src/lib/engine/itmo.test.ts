@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  buildItmoTest, computeItmoScores, ITMO_PROGRAMS, itmoDirections, seededRngFactory
+  buildItmoTest, computeItmoScores, ITMO_PROGRAMS, itmoDirections, seededRngFactory,
+  itmoRequirements, ITMO_EXAM_SETS
 } from '../data/itmo';
 import { STAGE2_QUESTIONS } from '../data/directions';
 
@@ -51,6 +52,39 @@ describe('buildItmoTest', () => {
   it('все программы привязаны к существующим направлениям', () => {
     const known = new Set(['dev', 'data', 'product', 'marketing', 'mgmt', 'infra', 'people']);
     for (const p of ITMO_PROGRAMS) expect(known.has(p.directionId)).toBe(true);
+  });
+
+  it('у каждой программы есть требования: комбинация из 3 предметов ЕГЭ', () => {
+    const knownSets = new Set([
+      ITMO_EXAM_SETS.MIR, ITMO_EXAM_SETS.MFR, ITMO_EXAM_SETS.MBR, ITMO_EXAM_SETS.MHR,
+      ITMO_EXAM_SETS.MOR, ITMO_EXAM_SETS.MIYaR, ITMO_EXAM_SETS.LOR
+    ].map((s) => s.join('|')));
+    for (const p of ITMO_PROGRAMS) {
+      const req = itmoRequirements(p);
+      expect(req.exams.length).toBeGreaterThan(0);
+      for (const set of req.exams) {
+        expect(set).toHaveLength(3);
+        expect(set.every((s) => typeof s === 'string' && s.length > 0)).toBe(true);
+        expect(knownSets.has(set.join('|'))).toBe(true);
+      }
+      expect(req.minBalls).toBeGreaterThanOrEqual(36);
+      expect(req.minBalls).toBeLessThanOrEqual(100);
+      if (req.minBySubject) {
+        for (const v of Object.values(req.minBySubject)) {
+          expect(v).toBeGreaterThanOrEqual(req.minBalls);
+          expect(v).toBeLessThanOrEqual(100);
+        }
+      }
+    }
+  });
+
+  it('у каждого кода направления — корректная комбинация ЕГЭ (не пустая и без дублей предметов)', () => {
+    for (const p of ITMO_PROGRAMS) {
+      const req = itmoRequirements(p);
+      for (const set of req.exams) {
+        expect(new Set(set).size).toBe(set.length);
+      }
+    }
   });
 });
 

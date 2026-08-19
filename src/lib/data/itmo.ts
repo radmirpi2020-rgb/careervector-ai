@@ -9,12 +9,91 @@ export interface ItmoProgram {
   tagline: string;
 }
 
+export interface ItmoRequirements {
+  /** Альтернативные комбинации ЕГЭ (каждая — набор из 3 предметов) */
+  exams: string[][];
+  /** Базовый минимум по каждому предмету комбинации (баллы ЕГЭ) */
+  minBalls: number;
+  /** Повышенные минимумы по отдельным предметам (например 75) */
+  minBySubject?: Record<string, number>;
+  /** Творческое испытание (если есть) */
+  creative?: string;
+  /** Средний балл ЕГЭ зачисленных, 2025 (0–100 по предмету, по данным abit.itmo.ru) */
+  avg2025?: number;
+  /** БВИ: олимпиады, дающие поступление без вступительных испытаний */
+  bvi?: string;
+  note?: string;
+}
+
 export interface ItmoTestQuestion {
   id: string;
   directionId: string;
   statement: string;
   priority: number;
 }
+
+export const ITMO_EXAM_SETS: Record<string, string[]> = {
+  MIR: ['Математика (профиль)', 'Информатика и ИКТ', 'Русский язык'],
+  MFR: ['Математика (профиль)', 'Физика', 'Русский язык'],
+  MBR: ['Математика (профиль)', 'Биология', 'Русский язык'],
+  MHR: ['Математика (профиль)', 'Химия', 'Русский язык'],
+  MOR: ['Математика (профиль)', 'Обществознание', 'Русский язык'],
+  MIYaR: ['Математика (профиль)', 'Иностранный язык', 'Русский язык'],
+  LOR: ['Литература', 'Обществознание', 'Русский язык']
+};
+
+/**
+ * Требования к поступлению на программы ИТМО.
+ * ЕГЭ-комбинации и минимумы — по правилам приёма ИТМО (abit.itmo.ru, приём 2025–2026),
+ * средние баллы 2025 — по данным приёмной кампании ИТМО. Уточняйте на abit.itmo.ru.
+ */
+export const ITMO_REQUIREMENTS: Record<string, ItmoRequirements> = {
+  itmo_software: {
+    exams: [ITMO_EXAM_SETS.MIR],
+    minBalls: 60,
+    avg2025: 97.9,
+    bvi: 'Олимпиады РСОШ и ВсОШ по информатике, математике, физике — призёрам и победителям'
+  },
+  itmo_sys_sw: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, bvi: 'Олимпиады РСОШ и ВсОШ по информатике и математике' },
+  itmo_cst: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, avg2025: 91.2, bvi: 'Олимпиады РСОШ и ВсОШ по информатике и математике' },
+  itmo_neuro: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, bvi: 'Олимпиады РСОШ и ВсОШ по информатике и математике' },
+  itmo_games: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, note: 'Профильное направление геймдева; отдельного творческого испытания нет' },
+  itmo_cloud_dev: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60 },
+  itmo_ml: {
+    exams: [ITMO_EXAM_SETS.MIR],
+    minBalls: 60,
+    minBySubject: { 'Математика (профиль)': 75, 'Информатика и ИКТ': 75 },
+    avg2025: 97.8,
+    bvi: 'Олимпиады РСОШ по информатике и математике; Мегаконкурс ИТМО'
+  },
+  itmo_ai_eng: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, avg2025: 99.3, bvi: 'Олимпиады РСОШ по информатике и математике' },
+  itmo_comp_tech: {
+    exams: [ITMO_EXAM_SETS.MIR],
+    minBalls: 60,
+    minBySubject: { 'Математика (профиль)': 75, 'Информатика и ИКТ': 75 },
+    avg2025: 97.8,
+    bvi: 'Олимпиады РСОШ по информатике и математике'
+  },
+  itmo_llm: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, bvi: 'Олимпиады РСОШ по информатике и математике' },
+  itmo_physics: { exams: [ITMO_EXAM_SETS.MFR], minBalls: 60, avg2025: 95.9, note: 'Дополнительные баллы за победы в олимпиадах по физике (приоритетны на зачисление)' },
+  itmo_chem: { exams: [ITMO_EXAM_SETS.MHR], minBalls: 60, avg2025: 96.5 },
+  itmo_bio: { exams: [ITMO_EXAM_SETS.MBR], minBalls: 60, note: 'Учитываются русский язык и профильная математика — по данным приёмной комиссии ИТМО' },
+  itmo_eco: { exams: [ITMO_EXAM_SETS.MBR], minBalls: 60, avg2025: 83.6 },
+  itmo_sec: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, bvi: 'Олимпиады РСОШ и ВсОШ по информатике и математике' },
+  itmo_photonics: { exams: [ITMO_EXAM_SETS.MFR], minBalls: 60, note: 'Программа физико-технического мегафакультета ИТМО' },
+  itmo_laser: { exams: [ITMO_EXAM_SETS.MFR], minBalls: 60, note: 'Программа физико-технического мегафакультета ИТМО' },
+  itmo_nano: { exams: [ITMO_EXAM_SETS.MFR], minBalls: 60, note: 'Программа физико-технического мегафакультета ИТМО' },
+  itmo_robotics: { exams: [ITMO_EXAM_SETS.MFR, ITMO_EXAM_SETS.MIR], minBalls: 60, note: 'По выбору: физика или информатика' },
+  itmo_design_dev: { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, note: 'Программа на стыке ИТ и дизайна; приём по направлению 09.03.04' },
+  itmo_design: {
+    exams: [ITMO_EXAM_SETS.LOR],
+    minBalls: 60,
+    creative: 'Творческое испытание «Рисунок и композиция» (мин. 60 баллов)',
+    note: 'Точный перечень и форму испытания уточняйте на abit.itmo.ru — для 54.03.01 действуют особые правила приёма'
+  },
+  itmo_bizinf: { exams: [ITMO_EXAM_SETS.MOR, ITMO_EXAM_SETS.MIYaR], minBalls: 60, note: 'Обществознание или иностранный язык — по выбору поступающего' },
+  itmo_innov: { exams: [ITMO_EXAM_SETS.MFR, ITMO_EXAM_SETS.MIR], minBalls: 60, note: 'По выбору: физика или информатика' }
+};
 
 export const ITMO_PROGRAMS: ItmoProgram[] = [
   // ============ Разработка ============
@@ -53,6 +132,12 @@ export const ITMO_PROGRAM_BY_ID: Record<string, ItmoProgram> = Object.fromEntrie
 
 export function itmoDirections(): string[] {
   return [...new Set(ITMO_PROGRAMS.map((p) => p.directionId))];
+}
+
+export function itmoRequirements(p: ItmoProgram): ItmoRequirements {
+  return (
+    ITMO_REQUIREMENTS[p.id] ?? { exams: [ITMO_EXAM_SETS.MIR], minBalls: 60, note: 'Требования уточняйте на abit.itmo.ru' }
+  );
 }
 
 // ===================== РАНДОМАЙЗЕР ТЕСТА =====================
